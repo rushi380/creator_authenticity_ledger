@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment secrets — NEVER commit .env with secrets
+.env
+.env.local
+.env.*.local
+
+# Midnight managed artifacts (regenerate with: npm run compile:contract)
+# managed/ is kept in repo so CI can run without toolchain
+# If you want to exclude them: uncomment below
+# managed/
+
+# Private keys and wallet credentials
+*.pem
+*.key
+wallet-seed.txt
+deployment-wallet.json
+
+# TypeScript build info
+*.tsbuildinfo
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+
+# Vitest cache
+.vitest/
