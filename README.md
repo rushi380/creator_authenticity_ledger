@@ -1,6 +1,6 @@
 # Creator Authenticity Ledger
 
-[![CI](https://github.com/YOUR_GITHUB_USERNAME/creator-authenticity-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/creator-authenticity-ledger/actions/workflows/ci.yml)
+[![CI](https://github.com/rushi380/creator_authenticity_ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/rushi380/creator_authenticity_ledger/actions/workflows/ci.yml)
 [![Midnight Preprod](https://img.shields.io/badge/Midnight-Preprod-7C3AED)](https://midnight.network)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -494,9 +494,7 @@ GitHub Actions runs on every push to `main` and every pull request:
 | `build` | Vite production build |
 | `ci-gate` | All jobs must pass |
 
-**Badge:** [![CI](https://github.com/YOUR_GITHUB_USERNAME/creator-authenticity-ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_USERNAME/creator-authenticity-ledger/actions/workflows/ci.yml)
-
-> Replace `YOUR_GITHUB_USERNAME` with your actual GitHub username after pushing.
+**Badge:** [![CI](https://github.com/rushi380/creator_authenticity_ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/rushi380/creator_authenticity_ledger/actions/workflows/ci.yml)
 
 ---
 
