@@ -1,0 +1,107 @@
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Creator Authenticity Ledger — Compact Smart Contract
+//
+// Public ledger state (on-chain, visible to everyone):
+//   - verificationId   : identifier for this verification record
+//   - isAuthentic      : boolean result of the authenticity proof
+//   - minEngagementBps : required engagement rate in basis points (public config)
+//   - minConsistency   : required posting consistency score (public config)
+//   - minAudienceScore : required verified audience score (public config)
+//
+// Private witnesses (never leave the prover's machine):
+//   - followerCount          : total followers
+//   - genuineEngagementCount : verified genuine interactions
+//   - postingConsistencyScore: score 0-100 for posting regularity
+//   - verifiedAudienceScore  : score 0-100 for audience authenticity
+//
+// Privacy guarantee: The ZK circuit proves that all thresholds are met
+// WITHOUT disclosing the private metric values to the chain.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Public on-chain state ─────────────────────────────────────────────────────
+export ledger verificationId: Bytes<32>;
+export ledger isAuthentic: Boolean;
+export ledger minEngagementBps: Uint<64>;   // e.g. 300 = 3.00%
+export ledger minConsistency: Uint<64>;     // e.g. 60  = 60/100
+export ledger minAudienceScore: Uint<64>;   // e.g. 70  = 70/100
+export ledger verificationCount: Uint<32>;  // how many times verified
+
+// ── Private witnesses (provided by the prover, never on-chain) ───────────────
+witness followerCount(): Uint<64>;
+witness genuineEngagementCount(): Uint<64>;
+witness postingConsistencyScore(): Uint<64>;
+witness verifiedAudienceScore(): Uint<64>;
+
+// ── Constructor ───────────────────────────────────────────────────────────────
+constructor(
+  _verificationId: Bytes<32>,
+  _minEngagementBps: Uint<64>,
+  _minConsistency: Uint<64>,
+  _minAudienceScore: Uint<64>
+) {
+  verificationId    = disclose(_verificationId);
+  isAuthentic       = disclose(false);
+  minEngagementBps  = disclose(_minEngagementBps);
+  minConsistency    = disclose(_minConsistency);
+  minAudienceScore  = disclose(_minAudienceScore);
+  verificationCount = disclose(0 as Uint<32>);
+}
+
+// ── Main authenticity circuit ─────────────────────────────────────────────────
+// Proves: engagement_rate >= minEngagementBps AND consistency >= minConsistency
+//         AND audienceScore >= minAudienceScore
+//
+// Integer arithmetic (no floats in Compact):
+//   engagementRate_bps = (genuineEngagementCount * 10000) / followerCount
+//   We compare: genuineEngagementCount * 10000 >= followerCount * minEngagementBps
+//   This avoids division entirely and is safe for Uint<64>.
+export circuit proveAuthenticity(): [] {
+  // Read private witnesses — these values NEVER appear on-chain
+  const followers   = followerCount();
+  const genuine     = genuineEngagementCount();
+  const consistency = postingConsistencyScore();
+  const audience    = verifiedAudienceScore();
+
+  // Guard: follower count must be > 0 to avoid division-by-zero equivalent
+  assert(followers > (0 as Uint<64>),
+    "Follower count must be greater than zero");
+
+  // Guard: private inputs must be in valid ranges
+  assert(consistency <= (100 as Uint<64>),
+    "Consistency score must be between 0 and 100");
+  assert(audience <= (100 as Uint<64>),
+    "Audience score must be between 0 and 100");
+
+  // Engagement rate check (basis-point integer arithmetic)
+  // genuine * 10000 >= followers * minEngagementBps
+  assert(
+    genuine * (10000 as Uint<64>) >= followers * minEngagementBps,
+    "Engagement rate is below the required threshold"
+  );
+
+  // Posting consistency check
+  assert(
+    consistency >= minConsistency,
+    "Posting consistency is below the required threshold"
+  );
+
+  // Verified audience score check
+  assert(
+    audience >= minAudienceScore,
+    "Verified audience score is below the required threshold"
+  );
+
+  // All checks passed — disclose only the boolean result
+  isAuthentic = disclose(true);
+  verificationCount = disclose(verificationCount + (1 as Uint<32>));
+}
+
+// ── Reset circuit (owner can reset verification for re-submission) ────────────
+export circuit resetVerification(): [] {
+  isAuthentic       = disclose(false);
+  verificationCount = disclose(verificationCount + (1 as Uint<32>));
+}
