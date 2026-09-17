@@ -16,7 +16,7 @@ This script guides a 60-second screen recording that demonstrates:
 ## Prerequisites Before Recording
 
 - [ ] App running locally: `npm run dev` (http://localhost:3000)
-- [ ] Docker proof server running: `docker run -d -p 6300:6000 midnightnetwork/proof-server:latest`
+- [ ] Docker proof server running: `docker run -d -p 6300:6300 midnightntwrk/proof-server:8.0.3`
 - [ ] Lace Wallet installed and set to **Preview** with DUST balance
 - [ ] Screen recorder ready (OBS, Loom, or QuickTime)
 - [ ] Browser window at 1280×800, dark mode, full screen

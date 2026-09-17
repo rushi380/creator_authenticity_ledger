@@ -104,7 +104,7 @@ console.log('  TO DEPLOY (or re-deploy) THE CONTRACT');
 console.log('────────────────────────────────────────────────────────');
 console.log('  Requirements:');
 console.log('    • WSL/Linux (wallet SDK + compact toolchain)');
-console.log('    • Docker proof server: docker run -d -p 6300:6000 midnightnetwork/proof-server:latest');
+console.log('    • Docker proof server: docker run -d -p 6300:6300 midnightntwrk/proof-server:8.0.3');
 console.log('    • Funded wallet (DUST) — get funds from the Midnight Preview faucet');
 console.log('');
 console.log('  Then run:');

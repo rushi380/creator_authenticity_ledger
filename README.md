@@ -324,7 +324,7 @@ cp .env.example .env
 npm run dev
 
 # Start Midnight proof server via Docker
-docker run -d -p 6300:6000 midnightnetwork/proof-server:latest
+docker run -d -p 6300:6300 midnightntwrk/proof-server:8.0.3
 ```
 
 ---
@@ -382,7 +382,7 @@ npm run copy:artifacts     # managed/ → public/
 
 1. Install Compact CLI (see above)
 2. Run `npm run setup` to install dependencies and compile/copy the contract artifacts
-3. Start Docker proof server: `docker run -d --name midnight-proof-server -p 6300:6300 midnightntwrk/proof-server:8.1.0`
+3. Start Docker proof server: `docker run -d --name midnight-proof-server -p 6300:6300 midnightntwrk/proof-server:8.0.3`
 4. Run `npm run deploy:dryrun` to check the artifacts and proof server
 5. Fund your wallet on Midnight Preview
 6. Set `WALLET_SEED` in your WSL environment (**never commit or paste this into chat**)

@@ -140,7 +140,7 @@ The README accurately describes only what Midnight actually provides:
 | 1 | Push to GitHub | ✅ Done — `https://github.com/rushi380/creator_authenticity_ledger.git` |
 | 2 | Install Compact CLI (Linux/WSL) | `curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh \| sh` |
 | 3 | Compile contract | `npm run compile:contract` |
-| 4 | Start Docker proof server | `docker run -d -p 6300:6000 midnightnetwork/proof-server:latest` |
+| 4 | Start Docker proof server | `docker run -d -p 6300:6300 midnightntwrk/proof-server:8.0.3` |
 | 5 | Deploy contract | ✅ Done — `WALLET_SEED="..." npm run deploy:preview` |
 | 6 | Update `.env` | ✅ Done — `VITE_CONTRACT_ADDRESS` set to the deployed address |
 | 7 | Update README | ✅ Done — README § Contract shows the real address |
