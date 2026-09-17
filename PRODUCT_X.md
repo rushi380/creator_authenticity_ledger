@@ -9,7 +9,7 @@
 
 | Field | Value |
 |---|---|
-| **Handle** | `@CreatorLedger` |
+| **Handle** | [@CreatorAut77](https://x.com/CreatorAut77) |
 | **Display Name** | `Creator Authenticity Ledger` |
 | **Email** | Use a dedicated product email (e.g. `creatorledger@proton.me`) |
 | **Profile Picture** | Purple gradient icon with "C" lettermark (matches app logo) |
@@ -140,14 +140,14 @@ Repo: https://github.com/rushi380/creator_authenticity_ledger.git
 3. Enter the display name: `Creator Authenticity Ledger`
 4. Use a dedicated product email address
 5. Complete phone/email verification
-6. Set username to `@CreatorLedger` (or closest available variant)
+6. Set username to `CreatorAut77`
 7. Upload profile picture (purple gradient "C" logo)
 8. Upload header banner (dark background with tagline)
 9. Add bio (160-char version above)
 10. Add website: `https://creator-authenticity-ledger.vercel.app`
 11. Post the launch post (copy from above)
 12. Pin the launch post to your profile
-13. Update `README.md` — replace `@CreatorLedger` placeholder with real handle
+13. Update `README.md` if the handle ever changes
 
 ---
 
@@ -157,13 +157,13 @@ After creating the account, update `README.md`:
 
 Find this section:
 ```markdown
-**Suggested handle:** `@CreatorLedger`  
+**Handle:** `@CreatorAut77`  
 **Profile:** X profile setup is documented in `PRODUCT_X.md` and requires manual account creation.
 ```
 
 Replace with:
 ```markdown
-**X Profile:** [@CreatorLedger](https://x.com/CreatorLedger)  
+**X Profile:** [@CreatorAut77](https://x.com/CreatorAut77)  
 **Launch Post:** [link to pinned post]
 ```
 

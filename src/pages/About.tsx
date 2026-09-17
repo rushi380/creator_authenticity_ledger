@@ -1,6 +1,8 @@
 import { Card, CardContent, Badge } from '@/components/ui';
+import { getEnvironment } from '@/utils/environment';
 
 export function About() {
+  const env = getEnvironment();
   const techStack = [
     { layer: 'Blockchain', tech: 'Midnight Network (Preview)' },
     { layer: 'Smart Contract Language', tech: 'Compact v0.23+' },
@@ -100,12 +102,24 @@ export function About() {
                 <span className="text-gray-400">Network</span>
                 <Badge variant="info">Midnight Preview</Badge>
               </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Contract Address</span>
-                <span className="font-mono text-xs text-gray-300">
-                  {import.meta.env.VITE_CONTRACT_ADDRESS || 'Pending deployment'}
+              <div className="flex justify-between gap-4">
+                <span className="text-gray-400 flex-shrink-0">Contract Address</span>
+                <span className="font-mono text-xs text-gray-300 break-all text-right">
+                  {env.contractAddress || 'Pending deployment'}
                 </span>
               </div>
+              {env.contractAddress && (
+                <div className="flex justify-between gap-4">
+                  <span className="text-gray-400 flex-shrink-0">Deployed At</span>
+                  <span className="text-xs text-gray-300">
+                    {new Date('2026-09-15T19:30:52.392Z').toLocaleDateString(undefined, {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </span>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

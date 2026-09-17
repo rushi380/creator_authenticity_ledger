@@ -557,8 +557,8 @@ The influencer marketing industry lacks a trustless way to verify creator authen
 
 See [`PRODUCT_X.md`](PRODUCT_X.md) for the full X profile setup instructions.
 
-**Suggested handle:** `@CreatorLedger`  
-**Profile:** X profile setup is documented in `PRODUCT_X.md` and requires manual account creation.
+**Handle:** [@CreatorAut77](https://x.com/CreatorAut77)  
+**Profile:** Follow for product updates and demo announcements.
 
 ---
 

@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Button, Badge, Card, CardContent } from '@/components/ui';
 import type { WalletState } from '@/types';
+import { getEnvironment } from '@/utils/environment';
 
 interface HomeProps {
   walletState: WalletState;
@@ -8,6 +9,7 @@ interface HomeProps {
 }
 
 export function Home({ walletState, onConnect }: HomeProps) {
+  const env = getEnvironment();
   const features = [
     {
       icon: '🔒',
@@ -31,7 +33,7 @@ export function Home({ walletState, onConnect }: HomeProps) {
     },
   ];
 
-  const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS;
+  const contractAddress = env.contractAddress;
 
   return (
     <main>
