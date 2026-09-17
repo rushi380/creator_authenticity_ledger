@@ -1,0 +1,16 @@
+$ compact compile contracts/creator_authenticity.compact /tmp/evidence-managed
+Compiling 2 circuits:
+exit code: 0
+--- generated artifacts ---
+compiler/contract-info.json
+contract/index.d.ts
+contract/index.js
+contract/index.js.map
+keys/proveAuthenticity.prover
+keys/proveAuthenticity.verifier
+keys/resetVerification.prover
+keys/resetVerification.verifier
+zkir/proveAuthenticity.bzkir
+zkir/proveAuthenticity.zkir
+zkir/resetVerification.bzkir
+zkir/resetVerification.zkir

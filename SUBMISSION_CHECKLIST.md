@@ -33,8 +33,8 @@ Complete audit of all Level 1–4 requirements.
 | 1.11 | Public GitHub repository | ✅ PASS | https://github.com/rushi380/creator_authenticity_ledger.git |
 | 1.12 | README.md | ✅ PASS | `README.md` — complete |
 | 1.13 | Local setup instructions | ✅ PASS | README.md § Installation, § Local Development |
-| 1.14 | Screenshot of successful compile output | ⚠️ MANUAL | Capture after: `npm run compile:contract` → `evidence/compile-success.png` |
-| 1.15 | Screenshot of deployed contract address | ⚠️ MANUAL | Capture from Midnight explorer after deploy → `evidence/deployment.png` |
+| 1.14 | Screenshot of successful compile output | ✅ PASS | `evidence/compile-success.png` — real `compact compile` run (Compact 0.5.2), exit code 0 |
+| 1.15 | Screenshot of deployed contract address | ✅ PASS | `evidence/deployment.png` — live indexer response showing the contract and its 9 on-chain transactions |
 | 1.16 | README explanation of public state vs private witness | ✅ PASS | README.md § Privacy Model |
 | 1.17 | Product idea paragraph | ✅ PASS | README.md § Product Idea |
 | 1.18 | 5+ meaningful commits | ✅ PASS | 15 commits in git history |
@@ -81,7 +81,7 @@ The privacy behavior is **architecturally enforced**, not cosmetic:
 | 3.7 | Approved product idea documented | ✅ PASS | README.md § Product Idea + § Product Proposal |
 | 3.8 | At least 10 meaningful commits | ✅ PASS | 15 commits |
 | 3.9 | Live demo | ✅ PASS | https://creator-authenticity-ledger.vercel.app |
-| 3.10 | Test-output screenshot | ⚠️ MANUAL | Run `npm test` → capture → `evidence/tests-passing.png` |
+| 3.10 | Test-output screenshot | ✅ PASS | `evidence/tests-passing.png` — 12 tests passing across 2 suites |
 | 3.11 | CI/CD badge/workflow evidence | ✅ PASS | CI badge in README.md (update URL after push) |
 | 3.12 | 1-minute demo video recorded | ✅ PASS | [Loom demo video](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e) — script in `DEMO.md` |
 | 3.13 | README privacy model section | ✅ PASS | README.md § Privacy Model |
@@ -115,6 +115,22 @@ The README accurately describes only what Midnight actually provides:
 | 4.11 | CI/CD badge/workflow | ✅ PASS | Badge in README.md (update GitHub username) |
 | 4.12 | Demo video | ✅ PASS | [Loom demo video](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e) |
 | 4.13 | Minimum 15 meaningful commits | ✅ PASS | 15 commits with descriptive messages |
+
+---
+
+## Evidence Screenshots
+
+All captured — see the files in [`evidence/`](evidence/) and their provenance in [`evidence/README.md`](evidence/README.md):
+
+| File | Shows |
+|---|---|
+| `evidence/tests-passing.png` | `npm test` — 12 tests passing (2 suites) |
+| `evidence/compile-success.png` | `compact compile` — exit code 0, all ZK artifacts generated |
+| `evidence/deployment.png` | Live indexer response — deployed contract + 9 on-chain transactions (incl. deploy tx) |
+| `evidence/circuit-success.png` | Brand portal reading live chain state — `AUTHENTIC ✓`, verification counter, on-chain thresholds |
+| `evidence/wallet-connected.png` | ⚠️ Still to capture manually: connect Lace/1AM in the app and screenshot the connected navbar |
+
+Raw companion logs: `test-output.txt`, `compile-output.txt`, `chain-query-response.json`.
 
 ---
 

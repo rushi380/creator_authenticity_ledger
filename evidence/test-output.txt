@@ -1,0 +1,25 @@
+
+> creator-authenticity-ledger@1.0.0 test
+> vitest run
+
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mC:/Users/RUSHIKESH/Downloads/timepass/creator-authenticity-ledger[39m
+
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 1: Authentic creator — all metrics satisfy thresholds → isAuthentic = true
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 2: Engagement too low — 1% rate vs 3% required → isAuthentic = false
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 3: Low consistency — score 40/100 vs required 60 → isAuthentic = false
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 4: Low audience score — 50/100 vs required 70 → isAuthentic = false
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 5: Zero follower count → circuit rejects (guard assertion)
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 6: Engagement exactly at boundary (3.00%) → isAuthentic = true
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 7: Engagement one unit below boundary → isAuthentic = false
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 8: Stricter custom thresholds — creator that passed default now fails
+ [32m✓[39m tests/authenticity.test.ts[2m > [22mCreator Authenticity Circuit — proveAuthenticity()[2m > [22mTEST 9: Privacy model — two different input sets produce identical public output
+ [32m✓[39m tests/wallet-connector.test.ts[2m > [22mMidnight DApp Connector v4 discovery[2m > [22mdoes not treat an unrelated 1AM connect API as a DApp Connector
+ [32m✓[39m tests/wallet-connector.test.ts[2m > [22mMidnight DApp Connector v4 discovery[2m > [22muses the v4 network-string signature for the selected 1AM connector
+ [32m✓[39m tests/wallet-connector.test.ts[2m > [22mMidnight DApp Connector v4 discovery[2m > [22mrequires the declared v4 API version before invoking connect
+
+[2m Test Files [22m [1m[32m2 passed[39m[22m[90m (2)[39m
+[2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
+[2m   Start at [22m 01:35:25
+[2m   Duration [22m 2.99s[2m (transform 252ms, setup 0ms, collect 2.30s, tests 8ms, environment 0ms, prepare 506ms)[22m
+

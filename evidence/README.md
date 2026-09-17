@@ -1,68 +1,30 @@
 # evidence/ — Screenshots and Evidence Files
 
-This directory holds evidence screenshots for the submission checklist.
+This directory holds evidence screenshots and raw logs for the submission checklist.
 
-## Required Screenshots
+## Evidence Files — Current Status
 
-| Filename | What to capture | When |
+| Filename | What it shows | Status |
 |---|---|---|
-| `compile-success.png` | Terminal output of `compact compile` showing circuits listed | After Compact CLI compilation |
-| `deployment.png` | Midnight Preview explorer showing contract address | ✅ Deployed — capture from the explorer with the address in README § Contract |
-| `tests-passing.png` | Terminal output of `npm test` with all 9 tests green | Any time |
-| `wallet-connected.png` | App navbar showing green "Connected" badge and wallet address | During live demo |
-| `circuit-success.png` | Verification success screen showing ✓ AUTHENTIC | During live demo |
-| `ci-passing.png` | GitHub Actions workflow showing all jobs green | After pushing to GitHub |
+| `tests-passing.png` | Real `npm test` run — **12 tests passing (2 suites)** | ✅ Captured |
+| `test-output.txt` | Raw text log of the same test run | ✅ Captured |
+| `compile-success.png` | Real `compact compile contracts/creator_authenticity.compact` run (Compact 0.5.2, WSL) — exit code 0, all ZK artifacts listed | ✅ Captured |
+| `compile-output.txt` | Raw text log of the same compile run | ✅ Captured |
+| `deployment.png` | **Live** Midnight Preview indexer response — the deployed contract with its 9 on-chain transactions, including the deployment tx `9d3010d3…36499` | ✅ Captured |
+| `chain-query-response.json` | Raw JSON of the same live indexer query | ✅ Captured |
+| `circuit-success.png` | App Brand portal reading **live on-chain state**: `AUTHENTIC ✓`, verification counter, on-chain thresholds — the direct result of successful `proveAuthenticity()` circuit calls | ✅ Captured |
+| `wallet-connected.png` | App navbar showing the green "Connected" badge with wallet address | ⚠️ MANUAL — requires your wallet extension; capture: connect Lace (or 1AM) in the app, then screenshot the connected navbar |
 
-## How to Capture
+## How the captured files were produced
 
-### compile-success.png
-```bash
-# In WSL/Linux with Compact CLI installed:
-compact compile contracts/creator_authenticity.compact ./managed
-# Screenshot the terminal output
-```
+- `tests-passing.png` / `test-output.txt`: `npm test` (vitest) — real run, 2026-09-18.
+- `compile-success.png` / `compile-output.txt`: `compact compile contracts/creator_authenticity.compact /tmp/evidence-managed` under WSL with Compact 0.5.2 — real run compiling to a temp directory (the committed `managed/` artifacts are untouched).
+- `deployment.png` / `chain-query-response.json`: POST to `https://indexer.preview.midnight.network/api/v4/graphql` querying the deployed contract — the response is live chain data, unedited.
+- `circuit-success.png`: the app's Brand Verification Portal querying the deployed contract address — the shown state (`AUTHENTIC`, verification counter, on-chain thresholds) is read directly from the Midnight Preview indexer.
 
-### tests-passing.png
-```bash
-npm test
-# Screenshot the full terminal output showing 9 passing tests
-```
+## Remaining manual capture
 
 ### wallet-connected.png
-1. Open http://localhost:3000
-2. Click Connect Wallet
-3. Approve in Lace
-4. Screenshot the navbar showing the connected state
-
-### circuit-success.png
-1. Connect wallet
-2. Navigate to /verify
-3. Enter: followers=50000, engagement=2000, consistency=75, audience=82
-4. Click Prove Authenticity
-5. Screenshot the success screen
-
-### ci-passing.png
-1. Push to GitHub
-2. Go to Actions tab
-3. Click the latest workflow run
-4. Screenshot all 5 jobs showing green checkmarks
-
-### deployment.png
-1. Run deploy script with funded wallet
-2. Copy contract address
-3. Open the Midnight explorer for the Preview network (check docs.midnight.network for the current explorer URL)
-4. Search for your contract address
-5. Screenshot the explorer showing the contract
-
-## Tools
-
-- **Windows:** Snipping Tool (Win+Shift+S) or ShareX
-- **macOS:** Command+Shift+4 for selection screenshot
-- **Linux:** gnome-screenshot or scrot
-
-## Format
-
-- PNG format preferred
-- Minimum 1280×720 resolution
-- Crop to show only relevant information
-- Do not edit or manipulate screenshots
+1. Open the app (locally or on Vercel)
+2. Click **Connect Wallet** and approve in Lace (or 1AM)
+3. Screenshot the navbar / wallet card showing the green "Connected" badge and your wallet address
