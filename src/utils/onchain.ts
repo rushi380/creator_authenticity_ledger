@@ -210,25 +210,99 @@ export interface OnChainProveResult {
 }
 
 /**
+ * Walks the whole error cause chain and extracts every detail that survived
+ * the extension boundary (name, message, stack head, extra own properties).
+ * Wallet-relayed errors often arrive with an empty message — the stack or
+ * attached properties are then the only clue to which step failed.
+ */
+function dumpErrorDetails(err: unknown, depth = 0): string {
+  if (err == null || depth > 5) return '';
+  const parts: string[] = [];
+  if (err instanceof Error) {
+    parts.push(err.name || 'Error');
+    parts.push(err.message || '(no message)');
+    if (err.stack) {
+      const frames = err.stack.split('\n').slice(1, 3).join(' | ').trim();
+      if (frames) parts.push(`at ${frames}`);
+    }
+    parts.push(dumpErrorDetails((err as { cause?: unknown }).cause, depth + 1));
+  } else {
+    try {
+      const extras = Object.getOwnPropertyNames(err as object)
+        .map(k => `${k}=${String((err as Record<string, unknown>)[k]).slice(0, 200)}`)
+        .join(', ');
+      parts.push(JSON.stringify(err) || extras);
+    } catch {
+      parts.push(String(err));
+    }
+  }
+  return parts.filter(Boolean).join(' :: ');
+}
+
+/**
+ * Translates low-level SDK / wallet errors into actionable messages.
+ */
+function friendlyProveError(err: unknown): string {
+  const details = dumpErrorDetails(err);
+  // Always keep the full trace in the console for debugging.
+  console.error('[onchain] verification failure details:', details, err);
+
+  const haystack = details;
+  if (/RemoteApiShutdown|was shutdown|object can no longer be used/i.test(haystack)) {
+    return 'The wallet connection dropped mid-transaction (the extension restarted its ' +
+      'background process). Reconnect the wallet and try again — the proof server and ' +
+      'chain connection are fine.';
+  }
+  if (/insufficient|InsufficientFunds|not enough/i.test(haystack)) {
+    return 'The wallet does not have enough DUST to pay the transaction fees. ' +
+      'Get Preview DUST from the Midnight faucet for this wallet address and retry.';
+  }
+  if (/Failed to fetch|NetworkError|network error/i.test(haystack)) {
+    return 'A network call failed mid-flow. Check that the proof server ' +
+      '(http://localhost:6300) is still running and that the indexer is reachable.';
+  }
+  if (/PermissionRejected|Rejected by|user rejected|denied/i.test(haystack)) {
+    return 'The transaction was rejected in the wallet.';
+  }
+  if (/^\s*Error\s*::?\s*\(no message\)/i.test(details) || details === 'Error :: (no message)') {
+    return 'The wallet relay failed without details (the extension swallowed the cause). ' +
+      'Most common causes: this wallet has no Preview DUST to pay fees, or the wallet\'s ' +
+      'node connection is down. Check the balance in Lace, top up from the Midnight faucet ' +
+      'if needed, and retry. Full trace: open DevTools → Console.';
+  }
+  return details || 'Unknown on-chain error';
+}
+
+function isStaleWalletChannel(err: unknown): boolean {
+  const msg = err instanceof Error ? err.message : String(err);
+  return /RemoteApiShutdown|was shutdown|object can no longer be used/i.test(msg);
+}
+
+/**
  * Submits a real proveAuthenticity() call transaction against the deployed
  * contract and waits for it to be finalized on Midnight.
+ *
+ * If the wallet's background process dies mid-transaction (RemoteApiShutdownError —
+ * a known extension lifecycle quirk), and a `reconnect` callback is supplied,
+ * the whole flow is retried once with a freshly connected wallet.
  */
 export async function proveCreatorAuthenticityOnChain(
   connector: MidnightWalletConnector,
   env: AppEnvironment,
   metrics: CreatorPrivateMetrics,
   onStepChange: (step: string) => void,
+  opts?: { reconnect?: () => Promise<MidnightWalletConnector> },
 ): Promise<OnChainProveResult> {
-  try {
+  const attempt = async (activeConnector: MidnightWalletConnector): Promise<OnChainProveResult> => {
     onStepChange('preparing');
     await assertProofServerReachable(env.proofServerUrl);
     const providers = await withWalletKeys(
-      buildProviders(connector, env, {
+      buildProviders(activeConnector, env, {
         onProving: () => onStepChange('generating_proof'),
         onBalancing: () => onStepChange('submitting'),
         onSubmitted: () => onStepChange('confirmed'),
       }),
-      connector,
+      activeConnector,
     );
 
     const compiledContract = buildCompiledContract(metrics);
@@ -259,13 +333,31 @@ export async function proveCreatorAuthenticityOnChain(
       contractAddress: env.contractAddress,
       error: null,
     };
+  };
+
+  try {
+    return await attempt(connector);
   } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown on-chain error';
+    // The wallet extension's background process can restart mid-flow and
+    // invalidate the connected channel. Reconnect once and retry.
+    if (isStaleWalletChannel(err) && opts?.reconnect) {
+      try {
+        const fresh = await opts.reconnect();
+        return await attempt(fresh);
+      } catch (retryErr) {
+        return {
+          success: false,
+          txHash: null,
+          contractAddress: env.contractAddress,
+          error: friendlyProveError(retryErr),
+        };
+      }
+    }
     return {
       success: false,
       txHash: null,
       contractAddress: env.contractAddress,
-      error: msg,
+      error: friendlyProveError(err),
     };
   }
 }

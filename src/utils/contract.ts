@@ -222,7 +222,8 @@ export async function proveCreatorAuthenticity(
   minEngagementBps: number,
   minConsistency: number,
   minAudienceScore: number,
-  onStepChange: (step: string) => void
+  onStepChange: (step: string) => void,
+  reconnect?: () => Promise<MidnightWalletConnector>
 ): Promise<CircuitCallResult> {
   const env = {
     ...getEnvironment(),
@@ -234,6 +235,7 @@ export async function proveCreatorAuthenticity(
     env,
     metrics,
     onStepChange,
+    { reconnect },
   );
 
   return {

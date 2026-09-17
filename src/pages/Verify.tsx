@@ -12,6 +12,7 @@ interface VerifyProps {
   connector: MidnightWalletConnector | null;
   onConnect: () => void;
   onDisconnect: () => void;
+  onReconnectWallet: () => Promise<MidnightWalletConnector>;
 }
 
 const INITIAL_METRICS: CreatorPrivateMetrics = {
@@ -21,7 +22,7 @@ const INITIAL_METRICS: CreatorPrivateMetrics = {
   verifiedAudienceScore: 0,
 };
 
-export function Verify({ walletState, connector, onConnect, onDisconnect }: VerifyProps) {
+export function Verify({ walletState, connector, onConnect, onDisconnect, onReconnectWallet }: VerifyProps) {
   const [metrics, setMetrics] = useState<CreatorPrivateMetrics>(INITIAL_METRICS);
   const [errors, setErrors] = useState<Partial<Record<keyof CreatorPrivateMetrics, string>>>({});
   const { verificationState, prove, reset, isProcessing, isVerified, isFailed } = useVerification();
@@ -53,7 +54,7 @@ export function Verify({ walletState, connector, onConnect, onDisconnect }: Veri
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!validate() || !connector) return;
-    await prove(connector, metrics);
+    await prove(connector, metrics, onReconnectWallet);
   }
 
   const liveEngagementBps = computeEngagementBps(metrics.genuineEngagementCount, metrics.followerCount);

@@ -1,5 +1,10 @@
 import { useState, useCallback } from 'react';
-import type { CreatorPrivateMetrics, VerificationState, VerificationStep, MidnightWalletConnector } from '@/types';
+import type {
+  CreatorPrivateMetrics,
+  VerificationState,
+  VerificationStep,
+  MidnightWalletConnector,
+} from '@/types';
 import { proveCreatorAuthenticity } from '@/utils/contract';
 import { getEnvironment } from '@/utils/environment';
 
@@ -14,29 +19,37 @@ const INITIAL_STATE: VerificationState = {
 export function useVerification() {
   const [verificationState, setVerificationState] = useState<VerificationState>(INITIAL_STATE);
 
-  const prove = useCallback(async (connector: MidnightWalletConnector, metrics: CreatorPrivateMetrics) => {
-    const env = getEnvironment();
-    const { thresholds } = env;
+  const prove = useCallback(
+    async (
+      connector: MidnightWalletConnector,
+      metrics: CreatorPrivateMetrics,
+      reconnect?: () => Promise<MidnightWalletConnector>,
+    ) => {
+      const env = getEnvironment();
+      const { thresholds } = env;
 
-    setVerificationState(prev => ({ ...prev, step: 'preparing', error: null }));
+      setVerificationState(prev => ({ ...prev, step: 'preparing', error: null }));
 
-    const result = await proveCreatorAuthenticity(
-      connector,
-      metrics,
-      thresholds.minEngagementBps,
-      thresholds.minConsistency,
-      thresholds.minAudienceScore,
-      (step: string) => {
-        setVerificationState(prev => ({
-          ...prev,
-          step: step as VerificationStep,
-        }));
-      }
-    );
+      const result = await proveCreatorAuthenticity(
+        connector,
+        metrics,
+        thresholds.minEngagementBps,
+        thresholds.minConsistency,
+        thresholds.minAudienceScore,
+        (step: string) => {
+          setVerificationState(prev => ({
+            ...prev,
+            step: step as VerificationStep,
+          }));
+        },
+        reconnect,
+      );
 
-    setVerificationState(result.verificationState);
-    return result;
-  }, []);
+      setVerificationState(result.verificationState);
+      return result;
+    },
+    [],
+  );
 
   const reset = useCallback(() => {
     setVerificationState(INITIAL_STATE);

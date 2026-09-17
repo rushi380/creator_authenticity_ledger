@@ -86,6 +86,22 @@ export function useWallet() {
     setWalletState(INITIAL_STATE);
   }, []);
 
+  /**
+   * Re-runs the connection handshake with the currently selected wallet and
+   * returns a fresh connector. Used to recover when the wallet extension's
+   * background process restarts and invalidates the existing channel
+   * (RemoteApiShutdownError mid-transaction).
+   */
+  const reconnectWallet = useCallback(async (): Promise<MidnightWalletConnector> => {
+    const env = getEnvironment();
+    const id = walletState.walletId;
+    if (!id) throw new Error('No wallet to reconnect — connect first.');
+    const { connector: fresh } = await connectWalletByid(id, env.network);
+    setConnector(fresh);
+    setWalletState(prev => ({ ...prev, status: 'connected', error: null }));
+    return fresh;
+  }, [walletState.walletId]);
+
   const refreshBalance = useCallback(async () => {
     if (!connector) return;
     try {
@@ -104,6 +120,7 @@ export function useWallet() {
     connector,
     connect,
     disconnect,
+    reconnectWallet,
     refreshBalance,
     isConnected: walletState.status === 'connected',
     availableWallets,

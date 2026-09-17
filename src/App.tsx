@@ -36,7 +36,8 @@ function Footer() {
 }
 
 export default function App() {
-  const { walletState, connector, connect, disconnect, availableWallets } = useWallet();
+  const { walletState, connector, connect, disconnect, reconnectWallet, availableWallets } =
+    useWallet();
 
   return (
     <BrowserRouter>
@@ -61,6 +62,7 @@ export default function App() {
                   connector={connector}
                   onConnect={connect}
                   onDisconnect={disconnect}
+                  onReconnectWallet={reconnectWallet}
                 />
               }
             />
