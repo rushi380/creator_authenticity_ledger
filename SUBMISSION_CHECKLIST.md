@@ -128,7 +128,7 @@ All captured — see the files in [`evidence/`](evidence/) and their provenance 
 | `evidence/compile-success.png` | `compact compile` — exit code 0, all ZK artifacts generated |
 | `evidence/deployment.png` | Live indexer response — deployed contract + 9 on-chain transactions (incl. deploy tx) |
 | `evidence/circuit-success.png` | Brand portal reading live chain state — `AUTHENTIC ✓`, verification counter, on-chain thresholds |
-| `evidence/wallet-connected.png` | ⚠️ Still to capture manually: connect Lace/1AM in the app and screenshot the connected navbar |
+| `evidence/wallet-connected.png` | Connected navbar — green "Connected" badge, 1AM, Midnight Preview |
 
 Raw companion logs: `test-output.txt`, `compile-output.txt`, `chain-query-response.json`.
 

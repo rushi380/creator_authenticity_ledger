@@ -188,26 +188,39 @@ function buildCompiledContract(metrics: CreatorPrivateMetrics): any {
 }
 
 /**
+ * Lightweight proof-server reachability probe. Any HTTP response (even 404
+ * on /) counts as reachable; a rejected fetch means the browser cannot use
+ * it. Used by the Verify page status chip and the pre-submission preflight.
+ */
+export async function checkProofServerReachable(
+  proofServerUrl: string,
+): Promise<'online' | 'offline'> {
+  try {
+    await fetch(proofServerUrl, { method: 'GET' });
+    return 'online';
+  } catch {
+    return 'offline';
+  }
+}
+
+/**
  * Verifies the proof server answers before starting the multi-step prove
  * flow. Any HTTP response (even 404 on /) proves reachability; a rejected
  * fetch means the browser could not reach it at all (container not started,
  * wrong port mapping, or blocked cross-origin).
  */
 async function assertProofServerReachable(proofServerUrl: string): Promise<void> {
-  try {
-    await fetch(proofServerUrl, { method: 'GET' });
-  } catch {
-    throw new Error(
-      `Proof server at ${proofServerUrl} is not reachable from the browser. ` +
-      'Quick check: open ' + proofServerUrl + ' in a new browser tab. ' +
-      'If the tab fails to load, the server is not running — start it with: ' +
-      'docker run -d -p 6300:6300 midnightntwrk/proof-server:8.0.3 ' +
-      '(the container listens on port 6300 — the host port must map to it). ' +
-      'If the tab DOES load, the server is up but this browser is blocking requests ' +
-      'to localhost from an HTTPS page — test the verify flow from http://localhost:3000 ' +
-      '(npm run dev), or point VITE_PROOF_SERVER_URL at a public HTTPS proof server.',
-    );
-  }
+  if ((await checkProofServerReachable(proofServerUrl)) === 'online') return;
+  throw new Error(
+    `Proof server at ${proofServerUrl} is not reachable from the browser. ` +
+    'Quick check: open ' + proofServerUrl + ' in a new browser tab. ' +
+    'If the tab fails to load, the server is not running — start it with: ' +
+    'docker run -d -p 6300:6300 midnightntwrk/proof-server:8.0.3 ' +
+    '(the container listens on port 6300 — the host port must map to it). ' +
+    'If the tab DOES load, the server is up but this browser is blocking requests ' +
+    'to localhost from an HTTPS page — test the verify flow from http://localhost:3000 ' +
+    '(npm run dev), or point VITE_PROOF_SERVER_URL at a public HTTPS proof server.',
+  );
 }
 
 // ── Real verification flow ────────────────────────────────────────────────────

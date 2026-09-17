@@ -13,7 +13,7 @@ This directory holds evidence screenshots and raw logs for the submission checkl
 | `deployment.png` | **Live** Midnight Preview indexer response — the deployed contract with its 9 on-chain transactions, including the deployment tx `9d3010d3…36499` | ✅ Captured |
 | `chain-query-response.json` | Raw JSON of the same live indexer query | ✅ Captured |
 | `circuit-success.png` | App Brand portal reading **live on-chain state**: `AUTHENTIC ✓`, verification counter, on-chain thresholds — the direct result of successful `proveAuthenticity()` circuit calls | ✅ Captured |
-| `wallet-connected.png` | App navbar showing the green "Connected" badge with wallet address | ⚠️ MANUAL — requires your wallet extension; capture: connect Lace (or 1AM) in the app, then screenshot the connected navbar |
+| `wallet-connected.png` | App navbar showing the green "Connected" badge with the connected wallet (1AM, Midnight Preview) | ✅ Captured — provided screenshot of the live connected state |
 
 ## How the captured files were produced
 
@@ -21,10 +21,3 @@ This directory holds evidence screenshots and raw logs for the submission checkl
 - `compile-success.png` / `compile-output.txt`: `compact compile contracts/creator_authenticity.compact /tmp/evidence-managed` under WSL with Compact 0.5.2 — real run compiling to a temp directory (the committed `managed/` artifacts are untouched).
 - `deployment.png` / `chain-query-response.json`: POST to `https://indexer.preview.midnight.network/api/v4/graphql` querying the deployed contract — the response is live chain data, unedited.
 - `circuit-success.png`: the app's Brand Verification Portal querying the deployed contract address — the shown state (`AUTHENTIC`, verification counter, on-chain thresholds) is read directly from the Midnight Preview indexer.
-
-## Remaining manual capture
-
-### wallet-connected.png
-1. Open the app (locally or on Vercel)
-2. Click **Connect Wallet** and approve in Lace (or 1AM)
-3. Screenshot the navbar / wallet card showing the green "Connected" badge and your wallet address

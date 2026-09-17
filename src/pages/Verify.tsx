@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Card, CardContent, CardHeader, Input, Badge } from '@/components/ui';
 import { WalletStatus } from '@/components/WalletStatus';
 import { VerificationSteps } from '@/components/VerificationSteps';
@@ -6,6 +6,7 @@ import { PrivacyFlow } from '@/components/PrivacyFlow';
 import type { WalletState, CreatorPrivateMetrics, MidnightWalletConnector } from '@/types';
 import { useVerification } from '@/hooks/useVerification';
 import { getEnvironment, formatEngagementRate, computeEngagementBps } from '@/utils/environment';
+import { checkProofServerReachable } from '@/utils/onchain';
 
 interface VerifyProps {
   walletState: WalletState;
@@ -27,6 +28,20 @@ export function Verify({ walletState, connector, onConnect, onDisconnect, onReco
   const [errors, setErrors] = useState<Partial<Record<keyof CreatorPrivateMetrics, string>>>({});
   const { verificationState, prove, reset, isProcessing, isVerified, isFailed } = useVerification();
   const env = getEnvironment();
+
+  // One-shot proof-server reachability check when the page opens.
+  // Non-blocking and purely informational — the pre-submission preflight
+  // re-checks before the flow starts.
+  const [proofServer, setProofServer] = useState<'checking' | 'online' | 'offline'>('checking');
+  useEffect(() => {
+    let cancelled = false;
+    checkProofServerReachable(env.proofServerUrl).then(status => {
+      if (!cancelled) setProofServer(status);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [env.proofServerUrl]);
 
   function handleChange(field: keyof CreatorPrivateMetrics, value: string) {
     const num = parseInt(value, 10);
@@ -258,6 +273,38 @@ export function Verify({ walletState, connector, onConnect, onDisconnect, onReco
                   Check that your wallet is connected, funded with DUST for fees, and that the
                   proof server ({env.proofServerUrl}) is reachable.
                 </p>
+              </div>
+            )}
+
+            {/* Proof server status chip (informational, non-blocking) */}
+            {proofServer !== 'checking' && (
+              <div className={`mt-4 p-3.5 rounded-xl border flex items-start gap-3 ${
+                proofServer === 'online'
+                  ? 'bg-emerald-500/5 border-emerald-800/40'
+                  : 'bg-amber-500/5 border-amber-700/40'
+              }`}>
+                <span className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
+                  proofServer === 'online' ? 'bg-emerald-400' : 'bg-amber-400 animate-pulse'
+                }`} />
+                <div className="text-xs leading-relaxed">
+                  {proofServer === 'online' ? (
+                    <p className="text-emerald-400/90">
+                      Proof server ready at <span className="font-mono">{env.proofServerUrl}</span> —
+                      verifications can be submitted.
+                    </p>
+                  ) : (
+                    <>
+                      <p className="text-amber-400/90">
+                        Proof server not reachable at <span className="font-mono">{env.proofServerUrl}</span> —
+                        submissions will fail until it's running on the machine this browser uses.
+                      </p>
+                      <p className="text-gray-500 mt-1">
+                        One-line fix: <code className="font-mono text-gray-400">docker run -d -p 6300:6300 midnightntwrk/proof-server:8.0.3</code>.
+                        Brand-portal chain reads work regardless.
+                      </p>
+                    </>
+                  )}
+                </div>
               </div>
             )}
 
