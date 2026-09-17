@@ -101,7 +101,12 @@ export function buildProviders(
     submitTx: async (tx: FinalizedTransaction): Promise<string> => {
       hooks?.onSubmitted?.();
       await connector.submitTransaction(toHex(tx.serialize()));
-      return tx.transactionHash();
+      // The SDK's finalization wait polls the indexer by transaction
+      // IDENTIFIER. The wallet SDK uses the last identifier of the submitted
+      // transaction for this — the hash does not match the indexer's
+      // identifier lookup and would make the wait poll forever.
+      const ids = (tx as { identifiers?: () => string[] }).identifiers?.() ?? [];
+      return ids.length > 0 ? ids[ids.length - 1] : tx.transactionHash();
     },
   };
 
