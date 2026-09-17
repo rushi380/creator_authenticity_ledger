@@ -31,12 +31,30 @@ export interface MidnightWalletAPI {
   icon: string;
 }
 
+/**
+ * DApp Connector API (v4) connector surface — the object returned by
+ * `window.midnight.<walletId>.connect(networkId)`.
+ *
+ * Method shapes follow the official @midnight-ntwrk/dapp-connector-api spec:
+ * transactions are hex-serialized ledger Transactions; balanceUnsealedTransaction
+ * takes a proven, unsealed tx (Transaction<SignatureEnabled, Proof, PreBinding>)
+ * and returns it sealed and ready for submitTransaction.
+ */
 export interface MidnightWalletConnector {
   getUnshieldedAddress: () => Promise<{ unshieldedAddress: string }>;
   getUnshieldedBalances: () => Promise<Record<string, bigint>>;
   getDustBalance: () => Promise<{ cap: bigint; balance: bigint }>;
   getConfiguration: () => Promise<{ networkId: string }>;
-  submitTransaction: (tx: unknown) => Promise<string>;
+  getShieldedAddresses: () => Promise<{
+    shieldedAddress: string;
+    shieldedCoinPublicKey: string;
+    shieldedEncryptionPublicKey: string;
+  }>;
+  balanceUnsealedTransaction: (
+    tx: string,
+    options?: { payFees?: boolean },
+  ) => Promise<{ tx: string }>;
+  submitTransaction: (tx: string) => Promise<void>;
 }
 
 export interface WindowMidnight {
@@ -120,6 +138,7 @@ export interface AppEnvironment {
   contractAddress: string;
   proofServerUrl: string;
   indexerUrl: string;
+  indexerWsUrl: string;
   nodeUrl: string;
   thresholds: AuthenticityThresholds;
 }

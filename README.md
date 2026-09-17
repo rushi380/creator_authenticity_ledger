@@ -1,7 +1,7 @@
 # Creator Authenticity Ledger
 
 [![CI](https://github.com/rushi380/creator_authenticity_ledger/actions/workflows/ci.yml/badge.svg)](https://github.com/rushi380/creator_authenticity_ledger/actions/workflows/ci.yml)
-[![Midnight Preprod](https://img.shields.io/badge/Midnight-Preprod-7C3AED)](https://midnight.network)
+[![Midnight Preview](https://img.shields.io/badge/Midnight-Preview-7C3AED)](https://midnight.network)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 > **Prove creator legitimacy without exposing private metrics.**  
@@ -14,7 +14,7 @@
 Creator Authenticity Ledger is a privacy-preserving dApp that solves influencer fraud using Midnight's zero-knowledge architecture. A creator can prove that their engagement metrics satisfy authenticity thresholds — without disclosing their follower count, engagement figures, or any other sensitive data. Brands receive only a cryptographic verification result recorded on-chain.
 
 **Live Demo:** `https://creator-authenticity-ledger.vercel.app` *(set after Vercel deployment)*  
-**Preprod Contract:** See [Preprod Contract](#preprod-contract) section below  
+**Deployed Contract:** See [Contract](#contract) section below  
 **X / Product Profile:** See [X Profile](#x--product-profile) section below
 
 ---
@@ -40,7 +40,7 @@ Creator Authenticity Ledger uses Midnight's ZK privacy model:
 1. A creator enters private metrics locally (follower count, genuine engagement, consistency, audience quality)
 2. The Compact smart contract circuit runs **entirely on the creator's device** via the local proof server
 3. A zero-knowledge proof is generated — proving the thresholds are met **without revealing the values**
-4. Only the boolean result (`isAuthentic = true`) is written to the Midnight Preprod ledger
+4. Only the boolean result (`isAuthentic = true`) is written to the Midnight Preview ledger
 5. Brands query the public contract state and receive the result — never the raw metrics
 
 ---
@@ -54,8 +54,8 @@ Midnight is a data-protection blockchain built specifically for applications whe
 | **Compact language** | Smart contract compiles to ZK circuits; private inputs never touch the chain |
 | **Witness mechanism** | Creator metrics are provided as `witness` callbacks that execute locally |
 | **`disclose()` primitive** | Only the boolean result is explicitly disclosed on-chain |
-| **Preprod network** | Fully deployed and verifiable; no trusted intermediary |
-| **Lace Wallet** | Browser extension wallet for signing and submitting proofs |
+| **Preview network** | Fully deployed and verifiable; no trusted intermediary |
+| **Lace / 1AM Wallet** | Browser extension wallets for balancing, signing, and submitting proofs |
 
 ---
 
@@ -76,7 +76,7 @@ This dApp addresses a direct consumer and creator economy problem. Creators are 
 ## Features
 
 - 🔒 **Zero-knowledge creator verification** — private metrics never leave the device
-- ✅ **On-chain boolean result** — verifiable authenticity record on Midnight Preprod
+- ✅ **On-chain boolean result** — verifiable authenticity record on Midnight Preview
 - 🌐 **Lace Wallet integration** — connect, disconnect, submit proofs
 - 🏷️ **Brand verification portal** — brands look up creator records without seeing private data
 - 📊 **Privacy flow diagram** — visual explanation of the ZK architecture
@@ -116,7 +116,7 @@ This dApp addresses a direct consumer and creator economy problem. Creators are 
 └──────────────────────────────────────┼────────────────────────────┘
                                        │ submits
                         ┌──────────────▼───────────────────────┐
-                        │      Midnight Preprod Network         │
+                        │      Midnight Preview Network         │
                         │  isAuthentic = true   (PUBLIC)        │
                         │  minEngagementBps     (PUBLIC)        │
                         │  verificationCount    (PUBLIC)        │
@@ -151,7 +151,7 @@ This dApp addresses a direct consumer and creator economy problem. Creators are 
 
 ### What an Observer CAN Learn
 
-- The contract exists at a specific address on Midnight Preprod
+- The contract exists at a specific address on Midnight Preview
 - Whether the creator's metrics passed the authenticity thresholds (`isAuthentic`)
 - The public threshold configuration values
 - How many verifications have been performed (`verificationCount`)
@@ -198,10 +198,10 @@ verifiedAudienceScore  ≥  minAudienceScore   (e.g. 70 out of 100)
 
 | Layer | Technology |
 |---|---|
-| Blockchain | Midnight Network (Preprod) |
+| Blockchain | Midnight Network (Preview) |
 | Smart contract language | Compact v0.23+ |
 | ZK runtime | `@midnight-ntwrk/compact-runtime` |
-| Wallet | Lace Wallet (Midnight browser extension) |
+| Wallet | Lace / 1AM (Midnight DApp Connector API v4) |
 | Frontend framework | React 19 + TypeScript |
 | Build tool | Vite 5 |
 | Styling | Tailwind CSS 3 |
@@ -243,15 +243,20 @@ creator-authenticity-ledger/
 │   │   ├── Privacy.tsx                # Privacy model explanation
 │   │   └── About.tsx                  # Product info & tech stack
 │   ├── utils/
-│   │   ├── contract.ts                # Wallet API & circuit simulation
-│   │   ├── environment.ts             # Env config helpers
-│   │   └── providers.ts               # Midnight SDK providers
+│   │   ├── contract.ts                # Wallet discovery & connection (DApp Connector v4)
+│   │   ├── onchain.ts                 # Real contract calls, provider bundle & on-chain state reads
+│   │   ├── zkConfigProvider.ts        # Browser fetch-based ZK artifact provider
+│   │   ├── thresholds.ts              # Pure circuit-arithmetic mirror (UX pre-check)
+│   │   └── environment.ts             # Env config helpers
 │   └── types/index.ts                 # TypeScript type definitions
 ├── tests/
-│   └── authenticity.test.ts           # 9 contract logic tests
+│   ├── authenticity.test.ts           # Contract logic tests (circuit arithmetic)
+│   └── wallet-connector.test.ts       # Wallet discovery/handshake tests
 ├── scripts/
 │   ├── copy-artifacts.cjs             # managed/ → public/
-│   ├── deploy.cjs                     # Preprod deployment script
+│   ├── deploy-preprod.mjs             # REAL deployment → writes deployment.json
+│   ├── deploy.cjs                     # Deployment preflight checks (no writes)
+│   ├── deploy-dryrun.mjs              # Dry-run deployment validation
 │   └── compile-check.cjs              # Toolchain availability check
 ├── evidence/                          # Screenshots and evidence files
 ├── .github/workflows/ci.yml           # GitHub Actions CI/CD
@@ -299,7 +304,7 @@ cp .env.example .env
 
 | Variable | Description | Example |
 |---|---|---|
-| `VITE_NETWORK` | Midnight network to connect to | `preprod` |
+| `VITE_NETWORK` | Midnight network to connect to | `preview` |
 | `VITE_CONTRACT_ADDRESS` | Deployed contract address | `0x...` |
 | `VITE_PROOF_SERVER_URL` | Local or remote proof server | `http://localhost:6300` |
 | `VITE_INDEXER_URL` | Midnight indexer GraphQL endpoint | `https://indexer.midnight.network/api/v1/graphql` |
@@ -373,21 +378,21 @@ npm run copy:artifacts     # managed/ → public/
 
 ## Deploy
 
-### Preprod Deployment
+### Preview Deployment
 
 1. Install Compact CLI (see above)
 2. Run `npm run setup` to install dependencies and compile/copy the contract artifacts
 3. Start Docker proof server: `docker run -d --name midnight-proof-server -p 6300:6300 midnightntwrk/proof-server:8.1.0`
 4. Run `npm run deploy:dryrun` to check the artifacts and proof server
-5. Fund your wallet on Midnight Preprod
+5. Fund your wallet on Midnight Preview
 6. Set `WALLET_SEED` in your WSL environment (**never commit or paste this into chat**)
-7. Run `npm run deploy:preprod`
-8. Copy the resulting contract address into `.env` as `VITE_CONTRACT_ADDRESS`
+7. Run `npm run deploy:preview`
+8. The deploy script writes `deployment.json` with the real contract address; the frontend picks it up automatically (also set `VITE_CONTRACT_ADDRESS` in `.env` to be explicit)
 
 ```bash
 read -rsp "Wallet seed: " WALLET_SEED; echo
 export WALLET_SEED
-npm run deploy:preprod
+npm run deploy:preview
 ```
 
 If Docker is mapped to another host port, set `VITE_PROOF_SERVER_URL` to that
@@ -408,18 +413,24 @@ Set the environment variables from `.env.example` in the Vercel dashboard.
 
 ---
 
-## Preprod Contract
+## Contract
+
+**Deployed on Midnight Preview.** The address below is the live contract — the
+frontend reads its public state directly from the Midnight indexer, and all
+verification transactions are submitted against it.
 
 | Field | Value |
 |---|---|
-| **Network** | Midnight Preprod |
-| **Contract Address** | `DEPLOY_CONTRACT_TO_GET_ADDRESS` — see [Deploy](#deploy) |
-| **Deployed At** | Pending deployment |
+| **Network** | Midnight Preview |
+| **Contract Address** | `c006cf208c80169aaa39ea787e1413a5451aeb4f1d121d65ba9e1b6f6a8c2a79` |
+| **Deploy TX Hash** | `9d3010d344a178f8385b02911b2596f8f49bba7f40c644a5afc3a191d9036499` |
+| **Deployed At** | 2026-09-15T19:30:52.392Z |
 | **Min Engagement** | 3.00% (300 bps) |
 | **Min Consistency** | 60/100 |
 | **Min Audience Score** | 70/100 |
 
-> **To deploy:** Follow the [Deploy](#deploy) section. The Compact CLI requires Linux/WSL. After deployment, update this README with the real contract address.
+The deployment metadata lives in [`deployment.json`](deployment.json), which the
+frontend also uses as a fallback for the contract address at build time.
 
 ---
 
@@ -432,10 +443,10 @@ Set the environment variables from `.env.example` in the Vercel dashboard.
 
 ## Lace Wallet
 
-1. Install the [Lace Wallet](https://www.lace.io) browser extension
+1. Install the [Lace Wallet](https://www.lace.io) browser extension (or the [1AM Wallet](https://1am.wtf))
 2. Open Lace → Settings → Enable **Midnight** feature
-3. Switch network to **Preprod**
-4. Get Preprod DUST from the Midnight faucet
+3. Switch network to **Preview**
+4. Get Preview DUST from the Midnight faucet
 5. Click **Connect Wallet** in the app
 
 ---
@@ -452,17 +463,17 @@ Set the environment variables from `.env.example` in the Vercel dashboard.
    - Genuine Engagement Count
    - Posting Consistency Score (0–100)
    - Verified Audience Score (0–100)
-5. Click **Prove Authenticity**
+5. Click **Prove Authenticity** — the real prove → balance → sign → submit → finalize pipeline runs against the deployed contract
 6. Watch the proof progress: Preparing → Generating ZK Proof → Executing Circuit → Submitting → Confirmed
-7. Receive: **✓ Authenticity Cryptographically Verified**
+7. Receive: **✓ Authenticity Cryptographically Verified** with the real transaction hash
 8. Note: private metric values are **not displayed** after verification
 
 ### Brand Flow
 
 1. Navigate to **Brands**
-2. Enter a creator handle (try `@creator_demo`) or contract address
-3. Click **Check Verification**
-4. See the binary result: `AUTHENTIC ✓` or `NOT AUTHENTIC ✗`
+2. Enter a contract address (defaults to the deployed contract)
+3. Click **Check Verification** — the page queries the live Midnight indexer
+4. See the on-chain result: `AUTHENTIC ✓`, `NOT AUTHENTIC ✗`, or `VERIFICATION PENDING`, plus the on-chain verification counter and thresholds
 5. Note: private data is shown as `████████████ — Protected by Midnight ZK privacy`
 
 ---
@@ -521,7 +532,7 @@ See [`DEMO.md`](DEMO.md) for the full 1-minute recording script.
 - 0:35 — Submit proof, watch progress steps
 - 0:48 — Show ✓ Authenticity Verified result
 - 0:54 — Show that private values are redacted
-- 0:58 — Show contract address on Preprod
+- 0:58 — Show contract address on Preview
 
 ---
 
@@ -551,7 +562,7 @@ Evidence files are in the `evidence/` directory.
 | Screenshot | Description |
 |---|---|
 | `evidence/compile-success.png` | Compact compiler output with circuits listed |
-| `evidence/deployment.png` | Deployed contract address on Preprod |
+| `evidence/deployment.png` | Deployed contract address on Preview |
 | `evidence/tests-passing.png` | All 9 tests passing |
 | `evidence/wallet-connected.png` | Lace wallet connected |
 | `evidence/circuit-success.png` | Successful proof verification |

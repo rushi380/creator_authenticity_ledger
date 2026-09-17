@@ -1,24 +1,23 @@
 /**
  * deploy.cjs
  *
- * Deploys the Creator Authenticity Ledger contract to Midnight Preview.
+ * Preflight checker for deploying the Creator Authenticity Ledger contract.
+ * Validates all prerequisites and prints the deployment procedure.
+ *
+ * This script DOES NOT deploy and DOES NOT write deployment.json — the real
+ * deployment is done by scripts/deploy-preprod.mjs, which writes a genuine
+ * deployment.json with the on-chain contract address.
  *
  * Prerequisites:
  *   1. Compact toolchain installed (compact CLI)
  *   2. Contract compiled: npm run compile:contract
  *   3. Artifacts copied:  npm run copy:artifacts
- *   4. .env created from .env.example with wallet mnemonic
- *   5. Docker running (proof server on port 6300)
- *   6. Lace wallet funded with DUST on Preview
+ *   4. Docker running (proof server on port 6300)
+ *   5. Wallet funded with DUST on the target network
  *
  * Usage:
- *   WALLET_MNEMONIC="word1 word2 ... word24" node scripts/deploy.cjs
- *
- * The script will:
- *   - Connect to Midnight Preview
- *   - Deploy the contract with default thresholds
- *   - Write deployment.json with contract address
- *   - Update .env with VITE_CONTRACT_ADDRESS
+ *   node scripts/deploy.cjs            # preflight checks only
+ *   npm run deploy:preview             # REAL deployment (WALLET_SEED required)
  */
 
 'use strict';
@@ -37,7 +36,6 @@ const CONFIG = {
   minEngagementBps: parseInt(process.env.VITE_MIN_ENGAGEMENT_BPS ?? '300', 10),
   minConsistency:   parseInt(process.env.VITE_MIN_CONSISTENCY    ?? '60',  10),
   minAudienceScore: parseInt(process.env.VITE_MIN_AUDIENCE_SCORE ?? '70',  10),
-  walletMnemonic:   process.env.WALLET_MNEMONIC ?? '',
 };
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -47,19 +45,11 @@ function ok(msg)   { console.log(`  ✅ ${msg}`); }
 function fail(msg) { console.error(`  ❌ ${msg}`); process.exit(1); }
 
 // ── Pre-flight checks ─────────────────────────────────────────────────────────
-console.log('\n🚀 Creator Authenticity Ledger — Preview Deployment\n');
+console.log('\n🔍 Creator Authenticity Ledger — Deployment Preflight\n');
 console.log(`   Network:      ${CONFIG.network}`);
 console.log(`   Proof Server: ${CONFIG.proofServerUrl}`);
 console.log(`   Indexer:      ${CONFIG.indexerUrl}`);
 console.log(`   Thresholds:   engagement=${CONFIG.minEngagementBps}bps, consistency=${CONFIG.minConsistency}, audience=${CONFIG.minAudienceScore}\n`);
-
-if (!CONFIG.walletMnemonic) {
-  fail(
-    'WALLET_MNEMONIC environment variable is required.\n' +
-    '   Usage: WALLET_MNEMONIC="word1 word2 ... word24" node scripts/deploy.cjs\n' +
-    '   ⚠️  Never commit your mnemonic to git!'
-  );
-}
 
 const managedDir = path.join(ROOT, 'managed');
 if (!fs.existsSync(managedDir)) {
@@ -70,74 +60,56 @@ if (!fs.existsSync(managedDir)) {
   );
 }
 
-// ── Deployment ────────────────────────────────────────────────────────────────
-// The actual deployment uses the Midnight JS SDK and Compact-generated artifacts.
-// Since the SDK requires the compiled contract (managed/ artifacts), this script
-// documents the deployment procedure and writes a result template.
-//
-// For live deployment, use the midnight-js API:
-//   import { deployContract } from '@midnight-ntwrk/midnight-js-contracts';
-//   const contract = await deployContract(providers, {
-//     contract: creatorAuthenticityContract,
-//     initialState: { ... },
-//     witnesses: { ... },
-//   });
-
 log('Checking managed/ artifacts…');
-const managedFiles = fs.readdirSync(managedDir);
-if (managedFiles.length === 0) {
-  fail('managed/ is empty. Run: npm run compile:contract first.');
+const requiredArtifacts = [
+  'contract/index.js',
+  'keys/proveAuthenticity.prover',
+  'keys/proveAuthenticity.verifier',
+  'zkir/proveAuthenticity.zkir',
+];
+for (const artifact of requiredArtifacts) {
+  const p = path.join(managedDir, artifact);
+  if (!fs.existsSync(p)) {
+    fail(`Missing managed/${artifact}. Run: npm run build:contract`);
+  }
 }
-log(`Found ${managedFiles.length} managed artifact(s): ${managedFiles.join(', ')}`);
+ok(`All required artifacts present in managed/`);
 
-log('Connecting to proof server…');
-// In production this hits the actual proof server health endpoint
-log(`Proof server URL: ${CONFIG.proofServerUrl}`);
-
-log('Preparing constructor arguments…');
-const constructorArgs = {
-  verificationId:    Array.from({ length: 32 }, (_, i) => i),  // placeholder bytes<32>
-  minEngagementBps:  CONFIG.minEngagementBps,
-  minConsistency:    CONFIG.minConsistency,
-  minAudienceScore:  CONFIG.minAudienceScore,
-};
-log(`Constructor: ${JSON.stringify(constructorArgs, null, 2)}`);
-
-// ── Write deployment result ───────────────────────────────────────────────────
-// In a live run this address comes from the blockchain after submission.
-// We write a deployment.json template that must be updated after real deployment.
-const deploymentResult = {
-  network:         CONFIG.network,
-  contractAddress: 'DEPLOY_WITH_COMPACT_CLI_AND_LACE_WALLET',
-  deployedAt:      new Date().toISOString(),
-  thresholds: {
-    minEngagementBps: CONFIG.minEngagementBps,
-    minConsistency:   CONFIG.minConsistency,
-    minAudienceScore: CONFIG.minAudienceScore,
-  },
-  deploymentStatus: 'MANUAL_DEPLOYMENT_REQUIRED',
-  instructions: [
-    '1. Install Compact CLI: curl --proto \'=https\' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh | sh',
-    '2. Run: compact compile contracts/creator_authenticity.compact ./managed',
-    '3. Start Docker proof server: docker run -d -p 6300:6000 midnightnetwork/proof-server:latest',
-    '4. Deploy via Midnight JS SDK or compact deploy CLI with your funded Lace wallet mnemonic',
-    '5. Copy the resulting contract address into .env as VITE_CONTRACT_ADDRESS',
-  ],
-};
-
+// ── Deployment status ─────────────────────────────────────────────────────────
 const deploymentPath = path.join(ROOT, 'deployment.json');
-fs.writeFileSync(deploymentPath, JSON.stringify(deploymentResult, null, 2));
-ok(`deployment.json written to: ${deploymentPath}`);
+if (fs.existsSync(deploymentPath)) {
+  try {
+    const deployment = JSON.parse(fs.readFileSync(deploymentPath, 'utf8'));
+    if (deployment.contractAddress && deployment.txHash) {
+      ok('Contract already deployed:');
+      log(`   Network:          ${deployment.network}`);
+      log(`   Contract Address: ${deployment.contractAddress}`);
+      log(`   TX Hash:          ${deployment.txHash}`);
+      log(`   Deployed At:      ${deployment.deployedAt}`);
+      log('');
+      log('   The frontend reads this address automatically (deployment.json fallback).');
+    } else {
+      warn('deployment.json exists but has no contract address — run a real deployment.');
+    }
+  } catch {
+    warn('deployment.json is not valid JSON.');
+  }
+} else {
+  warn('No deployment.json yet — the contract has not been deployed.');
+}
 
+// ── Real deployment procedure ─────────────────────────────────────────────────
 console.log('\n────────────────────────────────────────────────────────');
-console.log('  MANUAL DEPLOYMENT STEPS REQUIRED');
+console.log('  TO DEPLOY (or re-deploy) THE CONTRACT');
 console.log('────────────────────────────────────────────────────────');
-console.log('  The Midnight deployment requires:');
-console.log('    • Compact CLI (Linux/WSL)');
-console.log('    • Docker (proof server)');
-console.log('    • Funded Lace Wallet on Preview');
+console.log('  Requirements:');
+console.log('    • WSL/Linux (wallet SDK + compact toolchain)');
+console.log('    • Docker proof server: docker run -d -p 6300:6000 midnightnetwork/proof-server:latest');
+console.log('    • Funded wallet (DUST) — get funds from the Midnight Preview faucet');
 console.log('');
-console.log('  Full instructions: deployment.json');
-console.log('  After deployment, set in .env:');
-console.log('    VITE_CONTRACT_ADDRESS=<your_contract_address>');
+console.log('  Then run:');
+console.log('    WALLET_SEED="your 24-word mnemonic" npm run deploy:preview');
+console.log('');
+console.log('  The script writes deployment.json with the real contract');
+console.log('  address and prints the values to put into .env.');
 console.log('────────────────────────────────────────────────────────\n');

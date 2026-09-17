@@ -3,12 +3,13 @@ import { Button, Card, CardContent, CardHeader, Input, Badge } from '@/component
 import { WalletStatus } from '@/components/WalletStatus';
 import { VerificationSteps } from '@/components/VerificationSteps';
 import { PrivacyFlow } from '@/components/PrivacyFlow';
-import type { WalletState, CreatorPrivateMetrics } from '@/types';
+import type { WalletState, CreatorPrivateMetrics, MidnightWalletConnector } from '@/types';
 import { useVerification } from '@/hooks/useVerification';
 import { getEnvironment, formatEngagementRate, computeEngagementBps } from '@/utils/environment';
 
 interface VerifyProps {
   walletState: WalletState;
+  connector: MidnightWalletConnector | null;
   onConnect: () => void;
   onDisconnect: () => void;
 }
@@ -20,7 +21,7 @@ const INITIAL_METRICS: CreatorPrivateMetrics = {
   verifiedAudienceScore: 0,
 };
 
-export function Verify({ walletState, onConnect, onDisconnect }: VerifyProps) {
+export function Verify({ walletState, connector, onConnect, onDisconnect }: VerifyProps) {
   const [metrics, setMetrics] = useState<CreatorPrivateMetrics>(INITIAL_METRICS);
   const [errors, setErrors] = useState<Partial<Record<keyof CreatorPrivateMetrics, string>>>({});
   const { verificationState, prove, reset, isProcessing, isVerified, isFailed } = useVerification();
@@ -51,8 +52,8 @@ export function Verify({ walletState, onConnect, onDisconnect }: VerifyProps) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!validate()) return;
-    await prove(metrics);
+    if (!validate() || !connector) return;
+    await prove(connector, metrics);
   }
 
   const liveEngagementBps = computeEngagementBps(metrics.genuineEngagementCount, metrics.followerCount);
@@ -250,8 +251,12 @@ export function Verify({ walletState, onConnect, onDisconnect }: VerifyProps) {
             {/* Error message */}
             {isFailed && verificationState.error && (
               <div className="mt-4 p-4 rounded-xl bg-red-900/30 border border-red-800/50">
-                <p className="text-red-400 text-sm font-medium">Circuit execution failed</p>
+                <p className="text-red-400 text-sm font-medium">On-chain verification failed</p>
                 <p className="text-red-300 text-xs mt-1">{verificationState.error}</p>
+                <p className="text-red-400/70 text-xs mt-2">
+                  Check that your wallet is connected, funded with DUST for fees, and that the
+                  proof server ({env.proofServerUrl}) is reachable.
+                </p>
               </div>
             )}
 

@@ -7,7 +7,7 @@ This directory holds evidence screenshots for the submission checklist.
 | Filename | What to capture | When |
 |---|---|---|
 | `compile-success.png` | Terminal output of `compact compile` showing circuits listed | After Compact CLI compilation |
-| `deployment.png` | Midnight Preprod explorer showing contract address | After `node scripts/deploy.cjs` |
+| `deployment.png` | Midnight Preview explorer showing contract address | ✅ Deployed — capture from the explorer with the address in README § Contract |
 | `tests-passing.png` | Terminal output of `npm test` with all 9 tests green | Any time |
 | `wallet-connected.png` | App navbar showing green "Connected" badge and wallet address | During live demo |
 | `circuit-success.png` | Verification success screen showing ✓ AUTHENTIC | During live demo |
@@ -50,7 +50,7 @@ npm test
 ### deployment.png
 1. Run deploy script with funded wallet
 2. Copy contract address
-3. Open Midnight explorer: https://explorer.midnight.network/preprod
+3. Open the Midnight explorer for the Preview network (check docs.midnight.network for the current explorer URL)
 4. Search for your contract address
 5. Screenshot the explorer showing the contract
 

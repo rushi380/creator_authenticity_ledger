@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { WalletState, MidnightWalletConnector, WalletInfo } from '@/types';
 import { connectWalletByid, getAvailableWallets } from '@/utils/contract';
 import { getEnvironment } from '@/utils/environment';
@@ -16,7 +16,7 @@ const INITIAL_STATE: WalletState = {
 export function useWallet() {
   const [walletState, setWalletState] = useState<WalletState>(INITIAL_STATE);
   const [availableWallets, setAvailableWallets] = useState<WalletInfo[]>([]);
-  const connectorRef = useRef<MidnightWalletConnector | null>(null);
+  const [connector, setConnector] = useState<MidnightWalletConnector | null>(null);
 
   useEffect(() => {
     let attempts = 0;
@@ -65,8 +65,11 @@ export function useWallet() {
         );
       }
 
-      const { connector, walletState: newState } = await connectWalletByid(targetId, env.network);
-      connectorRef.current = connector;
+      const { connector: newConnector, walletState: newState } = await connectWalletByid(
+        targetId,
+        env.network,
+      );
+      setConnector(newConnector);
       setWalletState(newState);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to connect wallet';
@@ -79,26 +82,26 @@ export function useWallet() {
   }, []);
 
   const disconnect = useCallback(() => {
-    connectorRef.current = null;
+    setConnector(null);
     setWalletState(INITIAL_STATE);
   }, []);
 
   const refreshBalance = useCallback(async () => {
-    if (!connectorRef.current) return;
+    if (!connector) return;
     try {
-      const unshieldedBalances = await connectorRef.current.getUnshieldedBalances();
-      const dustBalance = await connectorRef.current.getDustBalance();
+      const unshieldedBalances = await connector.getUnshieldedBalances();
+      const dustBalance = await connector.getDustBalance();
       const nativeBalance = unshieldedBalances['native'] ?? 0n;
       const balanceDisplay = nativeBalance > 0n ? nativeBalance.toString() : dustBalance.balance.toString();
       setWalletState(prev => ({ ...prev, balance: balanceDisplay || null }));
     } catch {
       // silently ignore balance refresh errors
     }
-  }, []);
+  }, [connector]);
 
   return {
     walletState,
-    connector: connectorRef.current,
+    connector,
     connect,
     disconnect,
     refreshBalance,

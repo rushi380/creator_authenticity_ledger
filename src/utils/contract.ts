@@ -8,6 +8,9 @@
  *   - Private metrics are passed as witness callbacks — they execute locally
  *     inside the ZK circuit and are NEVER transmitted to the chain.
  *   - Only the boolean isAuthentic result is disclosed on-chain.
+ *
+ * Verification is fully on-chain: see utils/onchain.ts for the real
+ * prove → balance → sign → submit → finalize pipeline.
  */
 
 import type {
@@ -19,6 +22,10 @@ import type {
   CreatorWitnessProvider,
   WalletInfo,
 } from '@/types';
+import { proveCreatorAuthenticityOnChain, type OnChainProveResult } from '@/utils/onchain';
+import { getEnvironment } from '@/utils/environment';
+
+export type { OnChainProveResult };
 
 // ── Wallet discovery ──────────────────────────────────────────────────────────
 
@@ -59,6 +66,31 @@ function isOneAmWallet(wallet: MidnightWalletAPI): boolean {
 
 // ── Wallet connection ─────────────────────────────────────────────────────────
 
+async function buildWalletState(
+  connector: MidnightWalletConnector,
+  network: string,
+  walletId: string,
+  walletName: string,
+): Promise<WalletState> {
+  const addressResult = await connector.getUnshieldedAddress().catch(() => ({ unshieldedAddress: '' }));
+  const unshieldedBalances = await connector.getUnshieldedBalances().catch(() => ({}));
+  const dustBalance = await connector.getDustBalance().catch(() => ({ cap: 0n, balance: 0n }));
+  const config = await connector.getConfiguration().catch(() => ({ networkId: network }));
+
+  const nativeBalance = ('native' in unshieldedBalances ? unshieldedBalances['native'] : 0n);
+  const balanceDisplay = nativeBalance > 0n ? nativeBalance.toString() : dustBalance.balance.toString();
+
+  return {
+    status:  'connected',
+    address: addressResult.unshieldedAddress || null,
+    balance: balanceDisplay || null,
+    network: config.networkId || network,
+    error:   null,
+    walletId,
+    walletName,
+  };
+}
+
 export async function connectLaceWallet(network: string): Promise<{
   connector: MidnightWalletConnector;
   walletState: WalletState;
@@ -77,24 +109,7 @@ export async function connectLaceWallet(network: string): Promise<{
   }
 
   const connector = await laceWallet.connect(network);
-  const addressResult = await connector.getUnshieldedAddress().catch(() => ({ unshieldedAddress: '' }));
-  const unshieldedBalances = await connector.getUnshieldedBalances().catch(() => ({}));
-  const dustBalance = await connector.getDustBalance().catch(() => ({ cap: 0n, balance: 0n }));
-  const config = await connector.getConfiguration().catch(() => ({ networkId: network }));
-
-  const nativeBalance = ('native' in unshieldedBalances ? unshieldedBalances['native'] : 0n);
-  const balanceDisplay = nativeBalance > 0n ? nativeBalance.toString() : dustBalance.balance.toString();
-
-  const walletState: WalletState = {
-    status:  'connected',
-    address: addressResult.unshieldedAddress || null,
-    balance: balanceDisplay || null,
-    network: config.networkId || network,
-    error:   null,
-    walletId: 'mnLace',
-    walletName: 'Lace Wallet',
-  };
-
+  const walletState = await buildWalletState(connector, network, 'mnLace', 'Lace Wallet');
   return { connector, walletState };
 }
 
@@ -116,24 +131,7 @@ export async function connect1amWallet(network: string): Promise<{
   }
 
   const connector = await oneAmWallet.connect(network);
-  const addressResult = await connector.getUnshieldedAddress().catch(() => ({ unshieldedAddress: '' }));
-  const unshieldedBalances = await connector.getUnshieldedBalances().catch(() => ({}));
-  const dustBalance = await connector.getDustBalance().catch(() => ({ cap: 0n, balance: 0n }));
-  const config = await connector.getConfiguration().catch(() => ({ networkId: network }));
-
-  const nativeBalance = ('native' in unshieldedBalances ? unshieldedBalances['native'] : 0n);
-  const balanceDisplay = nativeBalance > 0n ? nativeBalance.toString() : dustBalance.balance.toString();
-
-  const walletState: WalletState = {
-    status:  'connected',
-    address: addressResult.unshieldedAddress || null,
-    balance: balanceDisplay || null,
-    network: config.networkId || network,
-    error:   null,
-    walletId: '1am',
-    walletName: '1AM Wallet',
-  };
-
+  const walletState = await buildWalletState(connector, network, '1am', '1AM Wallet');
   return { connector, walletState };
 }
 
@@ -181,24 +179,7 @@ export async function connectWalletByid(
     };
   }
 
-  const addressResult = await connector.getUnshieldedAddress().catch(() => ({ unshieldedAddress: '' }));
-  const unshieldedBalances = await connector.getUnshieldedBalances().catch(() => ({}));
-  const dustBalance = await connector.getDustBalance().catch(() => ({ cap: 0n, balance: 0n }));
-  const config = await connector.getConfiguration().catch(() => ({ networkId: network }));
-
-  const nativeBalance = ('native' in unshieldedBalances ? unshieldedBalances['native'] : 0n);
-  const balanceDisplay = nativeBalance > 0n ? nativeBalance.toString() : dustBalance.balance.toString();
-
-  const walletState: WalletState = {
-    status:  'connected',
-    address: addressResult.unshieldedAddress || null,
-    balance: balanceDisplay || null,
-    network: config.networkId || network,
-    error:   null,
-    walletId,
-    walletName: wallet.name || walletId,
-  };
-
+  const walletState = await buildWalletState(connector, network, walletId, wallet.name || walletId);
   return { connector, walletState };
 }
 
@@ -220,16 +201,7 @@ export function createWitnessProvider(
   };
 }
 
-// ── Contract interaction (frontend simulation layer) ─────────────────────────
-//
-// When the real Compact compiler generates managed/ artifacts, the frontend
-// uses @midnight-ntwrk/midnight-js-contracts to build and submit proofs.
-// Until deployment artifacts are available, this layer simulates the circuit
-// execution using the same mathematical rules as the Compact contract.
-//
-// The simulation validates the SAME arithmetic the Compact circuit enforces,
-// so the privacy behavior is functionally identical — private values stay
-// local, only the boolean result is surfaced.
+// ── Contract interaction (real on-chain pipeline) ─────────────────────────────
 
 export interface CircuitCallResult {
   success: boolean;
@@ -239,122 +211,42 @@ export interface CircuitCallResult {
   verificationState: VerificationState;
 }
 
-function simulateAuthenticityCircuit(
-  metrics: CreatorPrivateMetrics,
-  minEngagementBps: number,
-  minConsistency: number,
-  minAudienceScore: number
-): { passed: boolean; failReason: string | null } {
-  const { followerCount, genuineEngagementCount, postingConsistencyScore, verifiedAudienceScore } = metrics;
-
-  // Mirror exact Compact assertions
-  if (followerCount <= 0) {
-    return { passed: false, failReason: 'Follower count must be greater than zero' };
-  }
-  if (postingConsistencyScore > 100 || verifiedAudienceScore > 100) {
-    return { passed: false, failReason: 'Score values must be between 0 and 100' };
-  }
-
-  // Integer basis-point arithmetic (mirrors Compact: genuine * 10000 >= followers * minBps)
-  const lhs = BigInt(genuineEngagementCount) * 10000n;
-  const rhs = BigInt(followerCount) * BigInt(minEngagementBps);
-  if (lhs < rhs) {
-    return { passed: false, failReason: 'Engagement rate is below the required threshold' };
-  }
-
-  if (postingConsistencyScore < minConsistency) {
-    return { passed: false, failReason: 'Posting consistency is below the required threshold' };
-  }
-
-  if (verifiedAudienceScore < minAudienceScore) {
-    return { passed: false, failReason: 'Verified audience score is below the required threshold' };
-  }
-
-  return { passed: true, failReason: null };
-}
-
+/**
+ * Submits a real proveAuthenticity() call transaction to the deployed
+ * Midnight contract through the connected wallet, and waits for on-chain
+ * finalization. The returned transaction hash is the actual chain hash.
+ */
 export async function proveCreatorAuthenticity(
+  connector: MidnightWalletConnector,
   metrics: CreatorPrivateMetrics,
   minEngagementBps: number,
   minConsistency: number,
   minAudienceScore: number,
   onStepChange: (step: string) => void
 ): Promise<CircuitCallResult> {
-  const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
+  const env = {
+    ...getEnvironment(),
+    thresholds: { minEngagementBps, minConsistency, minAudienceScore },
+  };
 
-  try {
-    onStepChange('preparing');
-    await delay(800);
+  const result = await proveCreatorAuthenticityOnChain(
+    connector,
+    env,
+    metrics,
+    onStepChange,
+  );
 
-    onStepChange('generating_proof');
-    await delay(1200);
-
-    // Execute the circuit logic (same arithmetic as Compact contract)
-    const { passed, failReason } = simulateAuthenticityCircuit(
-      metrics, minEngagementBps, minConsistency, minAudienceScore
-    );
-
-    if (!passed) {
-      return {
-        success: false,
-        txHash: null,
-        contractAddress: null,
-        error: failReason,
-        verificationState: {
-          step: 'failed',
-          txHash: null,
-          contractAddress: null,
-          error: failReason,
-          timestamp: Date.now(),
-        },
-      };
-    }
-
-    onStepChange('executing_circuit');
-    await delay(1500);
-
-    onStepChange('submitting');
-    await delay(1000);
-
-    // Generate a realistic-looking mock transaction hash
-    const mockTxHash = `mn_tx_${Array.from({ length: 64 }, () =>
-      Math.floor(Math.random() * 16).toString(16)).join('')}`;
-
-    const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS ||
-      'DEPLOY_CONTRACT_TO_GET_ADDRESS';
-
-    onStepChange('confirmed');
-    await delay(600);
-
-    onStepChange('verified');
-
-    return {
-      success: true,
-      txHash: mockTxHash,
-      contractAddress,
-      error: null,
-      verificationState: {
-        step: 'verified',
-        txHash: mockTxHash,
-        contractAddress,
-        error: null,
-        timestamp: Date.now(),
-      },
-    };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Unknown circuit error';
-    return {
-      success: false,
-      txHash: null,
-      contractAddress: null,
-      error: msg,
-      verificationState: {
-        step: 'failed',
-        txHash: null,
-        contractAddress: null,
-        error: msg,
-        timestamp: Date.now(),
-      },
-    };
-  }
+  return {
+    success: result.success,
+    txHash: result.txHash,
+    contractAddress: result.contractAddress,
+    error: result.error,
+    verificationState: {
+      step: result.success ? 'verified' : 'failed',
+      txHash: result.txHash,
+      contractAddress: result.contractAddress,
+      error: result.error,
+      timestamp: Date.now(),
+    },
+  };
 }

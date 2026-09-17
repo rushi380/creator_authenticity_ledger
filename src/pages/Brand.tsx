@@ -1,60 +1,65 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Button, Card, CardContent, CardHeader, Input, Badge } from '@/components/ui';
-import type { BrandVerificationRecord } from '@/types';
-import { getEnvironment } from '@/utils/environment';
+import type { OnChainContractState } from '@/utils/onchain';
+import { readOnChainState } from '@/utils/onchain';
+import { getEnvironment, formatEngagementRate } from '@/utils/environment';
 
-const DEMO_RECORDS: BrandVerificationRecord[] = [
-  {
-    creatorHandle: '@creator_demo',
-    contractAddress: import.meta.env.VITE_CONTRACT_ADDRESS || 'AWAITING_DEPLOYMENT',
-    verificationId: 'ver_demo_001',
-    result: 'AUTHENTIC',
-    timestamp: Date.now() - 3600000,
-    network: 'preview',
-  },
-];
-
+/**
+ * Brand Verification Portal — reads the contract's real public ledger state
+ * from the Midnight indexer. Only the binary authenticity result and public
+ * counters are visible; private metrics are never part of the chain state.
+ */
 export function Brand() {
-  const [handle, setHandle] = useState('');
   const [contractAddr, setContractAddr] = useState('');
-  const [lookupResult, setLookupResult] = useState<BrandVerificationRecord | null>(null);
+  const [lookupResult, setLookupResult] = useState<OnChainContractState | null>(null);
   const [loading, setLoading] = useState(false);
   const [notFound, setNotFound] = useState(false);
+  const [lookupError, setLookupError] = useState<string | null>(null);
   const env = getEnvironment();
 
-  async function handleLookup(e: React.FormEvent) {
-    e.preventDefault();
-    setLoading(true);
-    setNotFound(false);
-    setLookupResult(null);
-
-    // Simulate network lookup delay
-    await new Promise(r => setTimeout(r, 1200));
-
-    // Match against demo records or deployed contract
-    const match = DEMO_RECORDS.find(r =>
-      r.creatorHandle.toLowerCase() === handle.toLowerCase() ||
-      r.contractAddress.toLowerCase() === contractAddr.toLowerCase()
-    );
-
-    if (match) {
-      setLookupResult(match);
-    } else if (env.contractAddress && contractAddr === env.contractAddress) {
-      // Simulate reading on-chain state
-      setLookupResult({
-        creatorHandle: handle || '@unknown',
-        contractAddress: env.contractAddress,
-        verificationId: 'live',
-        result: 'PENDING',
-        timestamp: Date.now(),
-        network: env.network,
-      });
-    } else {
-      setNotFound(true);
+  useEffect(() => {
+    // Default to the deployed contract so brands can check it immediately.
+    if (!contractAddr && env.contractAddress) {
+      setContractAddr(env.contractAddress);
     }
+  }, [env.contractAddress, contractAddr]);
 
-    setLoading(false);
-  }
+  const handleLookup = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      const address = contractAddr.trim();
+      if (!address) return;
+
+      setLoading(true);
+      setNotFound(false);
+      setLookupError(null);
+      setLookupResult(null);
+
+      try {
+        const state = await readOnChainState({ ...env, contractAddress: address });
+        if (state) {
+          setLookupResult(state);
+        } else {
+          setNotFound(true);
+        }
+      } catch (err) {
+        setLookupError(
+          err instanceof Error ? err.message : 'Failed to query the Midnight indexer'
+        );
+      } finally {
+        setLoading(false);
+      }
+    },
+    [contractAddr, env],
+  );
+
+  const result = lookupResult?.isAuthentic
+    ? 'AUTHENTIC'
+    : lookupResult && lookupResult.verificationCount > 0
+    ? 'NOT_AUTHENTIC'
+    : lookupResult
+    ? 'PENDING'
+    : 'UNKNOWN';
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10">
@@ -63,8 +68,9 @@ export function Brand() {
           Brand Verification Portal
         </h1>
         <p className="text-gray-400">
-          Look up a creator's on-chain authenticity verification record.
-          You'll receive only the binary result — private metrics remain hidden.
+          Look up a contract's on-chain authenticity verification state on Midnight.
+          You receive only the binary result and public counters — private metrics
+          are never part of the chain state.
         </p>
       </div>
 
@@ -73,39 +79,32 @@ export function Brand() {
         <div>
           <Card>
             <CardHeader>
-              <h2 className="text-base font-semibold text-white">Look Up Creator Verification</h2>
+              <h2 className="text-base font-semibold text-white">Query On-Chain Verification</h2>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLookup} className="space-y-4">
                 <Input
-                  label="Creator Handle"
-                  value={handle}
-                  onChange={e => setHandle(e.target.value)}
-                  placeholder="@creator_demo"
-                  hint="Creator's social handle"
-                />
-                <Input
-                  label="Contract Address (optional)"
+                  label="Contract Address"
                   value={contractAddr}
                   onChange={e => setContractAddr(e.target.value)}
-                  placeholder="0x…"
-                  hint="Midnight Preview contract address"
+                  placeholder={env.contractAddress || 'c0…'}
+                  hint="Midnight contract address (hex)"
                 />
                 <Button
                   type="submit"
                   variant="primary"
                   className="w-full"
                   loading={loading}
-                  disabled={!handle && !contractAddr}
+                  disabled={!contractAddr.trim()}
                 >
                   Check Verification
                 </Button>
               </form>
 
-              {/* Demo hint */}
               <div className="mt-4 p-3 rounded-xl bg-indigo-500/10 border border-indigo-800/40">
                 <p className="text-xs text-indigo-400">
-                  <strong>Demo:</strong> Try handle <code className="font-mono">@creator_demo</code>
+                  Queries the live Midnight indexer — the same public state any
+                  blockchain observer can read. No API keys, no trusted backend.
                 </p>
               </div>
             </CardContent>
@@ -136,73 +135,93 @@ export function Brand() {
             <Card>
               <CardContent className="text-center py-10">
                 <div className="text-4xl mb-3">🔍</div>
-                <p className="text-white font-semibold">No Record Found</p>
+                <p className="text-white font-semibold">No Contract Found</p>
                 <p className="text-gray-400 text-sm mt-2">
-                  No verification record found for that creator or contract address.
+                  No on-chain state found for that contract address. Verify the
+                  address and network (Midnight Preview).
                 </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {lookupError && (
+            <Card className="border-red-800/50">
+              <CardContent className="py-8 text-center">
+                <p className="text-red-400 text-sm font-medium">Indexer query failed</p>
+                <p className="text-red-300 text-xs mt-2 break-all">{lookupError}</p>
               </CardContent>
             </Card>
           )}
 
           {lookupResult && (
             <Card className={`overflow-hidden ${
-              lookupResult.result === 'AUTHENTIC'
+              result === 'AUTHENTIC'
                 ? 'border-emerald-800/50'
-                : lookupResult.result === 'NOT_AUTHENTIC'
+                : result === 'NOT_AUTHENTIC'
                 ? 'border-red-800/50'
                 : 'border-amber-800/50'
             }`}>
               <CardHeader>
                 <div className="flex items-center justify-between">
-                  <span className="text-white font-semibold">{lookupResult.creatorHandle}</span>
+                  <span className="text-white font-semibold font-mono text-xs">
+                    {env.contractAddress === contractAddr.trim() ? 'Deployed Contract' : 'Contract'}
+                  </span>
                   <Badge variant={
-                    lookupResult.result === 'AUTHENTIC' ? 'success' :
-                    lookupResult.result === 'NOT_AUTHENTIC' ? 'error' : 'warning'
+                    result === 'AUTHENTIC' ? 'success' :
+                    result === 'NOT_AUTHENTIC' ? 'error' : 'warning'
                   }>
-                    {lookupResult.result}
+                    {result}
                   </Badge>
                 </div>
               </CardHeader>
               <CardContent>
                 {/* Big result */}
                 <div className={`rounded-xl p-6 text-center mb-5 ${
-                  lookupResult.result === 'AUTHENTIC'
+                  result === 'AUTHENTIC'
                     ? 'bg-emerald-500/10 border border-emerald-800/50'
-                    : lookupResult.result === 'NOT_AUTHENTIC'
+                    : result === 'NOT_AUTHENTIC'
                     ? 'bg-red-500/10 border border-red-800/50'
                     : 'bg-amber-500/10 border border-amber-800/50'
                 }`}>
                   <div className="text-5xl mb-2">
-                    {lookupResult.result === 'AUTHENTIC'    ? '✅' :
-                     lookupResult.result === 'NOT_AUTHENTIC' ? '❌' : '⏳'}
+                    {result === 'AUTHENTIC'    ? '✅' :
+                     result === 'NOT_AUTHENTIC' ? '❌' : '⏳'}
                   </div>
                   <p className={`text-xl font-bold ${
-                    lookupResult.result === 'AUTHENTIC'    ? 'text-emerald-400' :
-                    lookupResult.result === 'NOT_AUTHENTIC' ? 'text-red-400' : 'text-amber-400'
+                    result === 'AUTHENTIC'    ? 'text-emerald-400' :
+                    result === 'NOT_AUTHENTIC' ? 'text-red-400' : 'text-amber-400'
                   }`}>
-                    {lookupResult.result === 'AUTHENTIC'    ? 'AUTHENTIC ✓' :
-                     lookupResult.result === 'NOT_AUTHENTIC' ? 'NOT AUTHENTIC ✗' :
+                    {result === 'AUTHENTIC'    ? 'AUTHENTIC ✓' :
+                     result === 'NOT_AUTHENTIC' ? 'NOT AUTHENTIC ✗' :
                      'VERIFICATION PENDING'}
                   </p>
                 </div>
 
-                {/* Metadata */}
+                {/* Metadata — real on-chain values */}
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Network</span>
-                    <span className="text-white font-medium capitalize">{lookupResult.network}</span>
+                    <span className="text-white font-medium capitalize">{env.network}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-400">Verified At</span>
-                    <span className="text-white">
-                      {new Date(lookupResult.timestamp).toLocaleDateString()}
-                    </span>
+                    <span className="text-gray-400">Verifications Recorded</span>
+                    <span className="text-white">{lookupResult.verificationCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Min. Engagement (on-chain)</span>
+                    <span className="text-white">{formatEngagementRate(Number(lookupResult.minEngagementBps))}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Min. Consistency (on-chain)</span>
+                    <span className="text-white">{Number(lookupResult.minConsistency)}/100</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-400">Min. Audience (on-chain)</span>
+                    <span className="text-white">{Number(lookupResult.minAudienceScore)}/100</span>
                   </div>
                   <div>
                     <p className="text-gray-400 mb-1">Contract</p>
-                    <p className="font-mono text-xs text-gray-300 break-all">
-                      {lookupResult.contractAddress}
-                    </p>
+                    <p className="font-mono text-xs text-gray-300 break-all">{contractAddr.trim()}</p>
                   </div>
                   <div className="pt-3 border-t border-gray-800">
                     <p className="text-xs text-violet-400 text-center">
@@ -218,13 +237,13 @@ export function Brand() {
             </Card>
           )}
 
-          {!lookupResult && !notFound && !loading && (
+          {!lookupResult && !notFound && !lookupError && !loading && (
             <Card>
               <CardContent className="text-center py-12">
                 <div className="text-5xl mb-4">🏷️</div>
                 <p className="text-gray-400 text-sm">
-                  Enter a creator handle or contract address to look up their
-                  authenticity verification record.
+                  Enter a contract address to read its authenticity verification
+                  state directly from the Midnight blockchain.
                 </p>
               </CardContent>
             </Card>

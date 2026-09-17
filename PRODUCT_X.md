@@ -15,7 +15,7 @@
 | **Profile Picture** | Purple gradient icon with "C" lettermark (matches app logo) |
 | **Header/Banner** | Dark background with "Prove authenticity. Protect privacy." tagline |
 | **Website** | `https://creator-authenticity-ledger.vercel.app` |
-| **Location** | `Midnight Network · Preprod` |
+| **Location** | `Midnight Network · Preview` |
 
 ---
 
@@ -40,7 +40,7 @@ follower counts, earnings, or private metrics.
 Built with:
 • Compact smart contracts (ZK circuits)
 • Lace Wallet integration
-• Midnight Preprod deployment
+• Midnight Preview deployment
 • React + TypeScript frontend
 
 Brands get fraud-resistant verification.
@@ -63,7 +63,7 @@ Our solution: Zero-knowledge proofs on @MidnightNtwrk
 
 ✅ Creators prove authenticity
 🔒 Private metrics NEVER leave their device
-🌐 Result recorded on Midnight Preprod
+🌐 Result recorded on Midnight Preview
 
 Built with Compact smart contracts + Lace Wallet
 
@@ -88,7 +88,7 @@ How does Creator Authenticity Ledger work? 🧵
 
 3/ A cryptographic proof is generated proving thresholds are met
 
-4/ Only the boolean result goes on @MidnightNtwrk Preprod
+4/ Only the boolean result goes on @MidnightNtwrk Preview
 
 5/ Brands see: ✅ AUTHENTIC — nothing else
 
@@ -101,7 +101,7 @@ This is what @MidnightNtwrk was built for 🌙
 What can a blockchain observer learn from Creator Authenticity Ledger?
 
 ✅ CAN see: AUTHENTIC or NOT AUTHENTIC
-✅ CAN see: Contract address on Midnight Preprod
+✅ CAN see: Contract address on Midnight Preview
 ✅ CAN see: Public threshold configuration
 
 ❌ CANNOT see: Follower count ████████

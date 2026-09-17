@@ -9,7 +9,7 @@ This script guides a 60-second screen recording that demonstrates:
 4. ZK proof generation
 5. Verification result
 6. Privacy guarantee
-7. Preprod contract evidence
+7. Preview contract evidence
 
 ---
 
@@ -17,7 +17,7 @@ This script guides a 60-second screen recording that demonstrates:
 
 - [ ] App running locally: `npm run dev` (http://localhost:3000)
 - [ ] Docker proof server running: `docker run -d -p 6300:6000 midnightnetwork/proof-server:latest`
-- [ ] Lace Wallet installed and set to **Preprod** with DUST balance
+- [ ] Lace Wallet installed and set to **Preview** with DUST balance
 - [ ] Screen recorder ready (OBS, Loom, or QuickTime)
 - [ ] Browser window at 1280×800, dark mode, full screen
 
@@ -46,12 +46,12 @@ This script guides a 60-second screen recording that demonstrates:
 **Action:** Click **Approve** in Lace  
 **Show:** Navbar updates to show wallet address + "Connected" green badge  
 **Narrate:**
-> "We connect our Lace Wallet, which is set to Midnight Preprod."
+> "We connect our Lace Wallet, which is set to Midnight Preview."
 
 **Expected UI state:**
 - Badge: `● Connected` (green, pulsing)
-- Address: `mn_shield_addr_preprod1...` (truncated)
-- Network: `Midnight Preprod`
+- Address: `mn_addr_preview1...` (truncated)
+- Network: `Midnight Preview`
 
 ---
 
@@ -89,7 +89,7 @@ This script guides a 60-second screen recording that demonstrates:
 ```
 
 **Narrate:**
-> "The ZK circuit runs locally on our machine. The proof is generated without sending private values anywhere. Only the cryptographic proof is submitted to Midnight Preprod."
+> "The ZK circuit runs locally on our machine. The proof is generated without sending private values anywhere. Only the cryptographic proof is submitted to Midnight Preview."
 
 **What to emphasize:** The multi-step progress showing real proof generation pipeline.
 
@@ -111,7 +111,7 @@ ON-CHAIN (Public):          PRIVATE (Hidden):
 ```
 
 **Narrate:**
-> "The result is recorded on Midnight Preprod. The public state shows VERIFIED. The private metrics are permanently hidden — represented here as redacted blocks, because that's exactly what the ZK circuit guarantees."
+> "The result is recorded on Midnight Preview. The public state shows VERIFIED. The private metrics are permanently hidden — represented here as redacted blocks, because that's exactly what the ZK circuit guarantees."
 
 ---
 
@@ -119,9 +119,9 @@ ON-CHAIN (Public):          PRIVATE (Hidden):
 
 **Action:** Navigate to **About** page or show the footer  
 **Show:** Contract address field  
-**Also show (optional):** Brand page with `@creator_demo` lookup returning `AUTHENTIC ✓`  
+**Also show (optional):** Brand page querying the deployed contract address and showing the live on-chain state  
 **Narrate:**
-> "The contract is deployed on Midnight Preprod. Anyone can query the result — no one can query the private data."
+> "The contract is deployed on Midnight Preview. Anyone can query the result — no one can query the private data."
 
 ---
 
@@ -133,7 +133,7 @@ ON-CHAIN (Public):          PRIVATE (Hidden):
 | 0:30 | Live engagement indicator | Shows real circuit math |
 | 0:35–0:45 | Proof progress steps | Shows real pipeline, not fake |
 | 0:50 | Redacted private values | Core privacy demonstration |
-| 0:52 | Contract address visible | Proves Preprod deployment |
+| 0:52 | Contract address visible | Proves Preview deployment |
 
 ---
 
@@ -153,7 +153,7 @@ ON-CHAIN (Public):          PRIVATE (Hidden):
 Add these sections after the 1-minute version:
 
 1. **Privacy page** (`/privacy`) — show the ZK flow diagram and Compact contract code excerpt
-2. **Brand portal** (`/brand`) — enter `@creator_demo`, show `AUTHENTIC ✓` with redacted private data
+2. **Brand portal** (`/brand`) — query the deployed contract address, show the live on-chain state with redacted private data
 3. **Tests** — run `npm test` in terminal, show 9 passing tests
 4. **CI badge** — show GitHub Actions workflow passing
 

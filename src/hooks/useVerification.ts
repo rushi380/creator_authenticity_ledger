@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import type { CreatorPrivateMetrics, VerificationState, VerificationStep } from '@/types';
+import type { CreatorPrivateMetrics, VerificationState, VerificationStep, MidnightWalletConnector } from '@/types';
 import { proveCreatorAuthenticity } from '@/utils/contract';
 import { getEnvironment } from '@/utils/environment';
 
@@ -14,13 +14,14 @@ const INITIAL_STATE: VerificationState = {
 export function useVerification() {
   const [verificationState, setVerificationState] = useState<VerificationState>(INITIAL_STATE);
 
-  const prove = useCallback(async (metrics: CreatorPrivateMetrics) => {
+  const prove = useCallback(async (connector: MidnightWalletConnector, metrics: CreatorPrivateMetrics) => {
     const env = getEnvironment();
     const { thresholds } = env;
 
     setVerificationState(prev => ({ ...prev, step: 'preparing', error: null }));
 
     const result = await proveCreatorAuthenticity(
+      connector,
       metrics,
       thresholds.minEngagementBps,
       thresholds.minConsistency,

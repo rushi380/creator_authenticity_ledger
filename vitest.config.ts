@@ -18,6 +18,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@managed/contract': path.resolve(__dirname, 'managed/contract/index.js'),
     },
   },
 });
