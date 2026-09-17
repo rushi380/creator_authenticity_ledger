@@ -76,7 +76,7 @@ export function buildProviders(
   const publicDataProvider = indexerPublicDataProvider(env.indexerUrl, env.indexerWsUrl);
   const privateStateProvider = levelPrivateStateProvider({
     privateStoragePasswordProvider: () =>
-      import.meta.env.VITE_PRIVATE_STATE_PASSWORD ?? 'CreatorAuthLedger-Preview-2026!',
+      import.meta.env.VITE_PRIVATE_STATE_PASSWORD || 'CreatorAuthLedger-Preview-2026!',
     accountId: 'browser-dapp',
   });
 

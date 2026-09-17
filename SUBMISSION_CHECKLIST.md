@@ -52,7 +52,7 @@ Complete audit of all Level 1–4 requirements.
 | 2.5 | Contract deployed to Preview | ✅ PASS | Deploy TX `9d3010d344a178f8385b02911b2596f8f49bba7f40c644a5afc3a191d9036499` |
 | 2.6 | Verifiable contract address | ✅ PASS | README.md § Contract + `deployment.json` |
 | 2.7 | README privacy claim | ✅ PASS | README.md § Privacy Model — What an Observer CANNOT Learn |
-| 2.8 | Live demo link | ⚠️ MANUAL | Deploy to Vercel → update README.md § Live Demo |
+| 2.8 | Live demo link | ✅ PASS | https://creator-authenticity-ledger.vercel.app |
 | 2.9 | Demo video instructions/script | ✅ PASS | `DEMO.md` — full 1-minute recording script |
 | 2.10 | At least 8 meaningful commits | ✅ PASS | 15 commits in git history |
 
@@ -80,7 +80,7 @@ The privacy behavior is **architecturally enforced**, not cosmetic:
 | 3.6 | Passing CI workflow | ⚠️ MANUAL | Push to GitHub → Actions tab shows green |
 | 3.7 | Approved product idea documented | ✅ PASS | README.md § Product Idea + § Product Proposal |
 | 3.8 | At least 10 meaningful commits | ✅ PASS | 15 commits |
-| 3.9 | Live demo | ⚠️ MANUAL | Deploy to Vercel |
+| 3.9 | Live demo | ✅ PASS | https://creator-authenticity-ledger.vercel.app |
 | 3.10 | Test-output screenshot | ⚠️ MANUAL | Run `npm test` → capture → `evidence/tests-passing.png` |
 | 3.11 | CI/CD badge/workflow evidence | ✅ PASS | CI badge in README.md (update URL after push) |
 | 3.12 | 1-minute demo video plan | ✅ PASS | `DEMO.md` — complete script with timestamps |
@@ -110,7 +110,7 @@ The README accurately describes only what Midnight actually provides:
 | 4.6 | CI/CD pipeline running on product repository | ⚠️ MANUAL | Push to GitHub → verify Actions run |
 | 4.7 | Product X profile created or documented | ✅ PASS | `PRODUCT_X.md` — handle, bio, posts, setup instructions |
 | 4.8 | Product X profile linked from README | ✅ PASS | README.md § X / Product Profile |
-| 4.9 | Live demo link | ⚠️ MANUAL | Deploy to Vercel → update README |
+| 4.9 | Live demo link | ✅ PASS | https://creator-authenticity-ledger.vercel.app |
 | 4.10 | Contract address in README | ✅ PASS | README.md § Contract — real address + TX hash |
 | 4.11 | CI/CD badge/workflow | ✅ PASS | Badge in README.md (update GitHub username) |
 | 4.12 | Demo video plan | ✅ PASS | `DEMO.md` |
@@ -144,8 +144,8 @@ The README accurately describes only what Midnight actually provides:
 | 5 | Deploy contract | ✅ Done — `WALLET_SEED="..." npm run deploy:preview` |
 | 6 | Update `.env` | ✅ Done — `VITE_CONTRACT_ADDRESS` set to the deployed address |
 | 7 | Update README | ✅ Done — README § Contract shows the real address |
-| 8 | Deploy to Vercel | `vercel --prod` with env vars set |
-| 9 | Update README | Replace placeholder URL in § Live Demo |
+| 8 | Deploy to Vercel | ✅ Done — https://creator-authenticity-ledger.vercel.app |
+| 9 | Update README | ✅ Done — § Live Demo shows the live URL |
 | 10 | Update CI badge | Replace `YOUR_GITHUB_USERNAME` in README badge URLs |
 | 11 | Capture screenshots | See `evidence/README.md` for what to capture |
 | 12 | Create X profile | Follow `PRODUCT_X.md` instructions |

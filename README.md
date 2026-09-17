@@ -13,7 +13,7 @@
 
 Creator Authenticity Ledger is a privacy-preserving dApp that solves influencer fraud using Midnight's zero-knowledge architecture. A creator can prove that their engagement metrics satisfy authenticity thresholds — without disclosing their follower count, engagement figures, or any other sensitive data. Brands receive only a cryptographic verification result recorded on-chain.
 
-**Live Demo:** `https://creator-authenticity-ledger.vercel.app` *(set after Vercel deployment)*  
+**Live App:** [https://creator-authenticity-ledger.vercel.app](https://creator-authenticity-ledger.vercel.app)  
 **Deployed Contract:** See [Contract](#contract) section below  
 **X / Product Profile:** See [X Profile](#x--product-profile) section below
 
@@ -409,7 +409,11 @@ npm i -g vercel
 vercel --prod
 ```
 
-Set the environment variables from `.env.example` in the Vercel dashboard.
+All `VITE_*` environment variables are optional: unset or blank values fall
+back to the defaults in `src/utils/environment.ts` and `deployment.json`
+(contract address, indexer endpoints, thresholds). Set them in the Vercel
+dashboard only to override, e.g. `VITE_PROOF_SERVER_URL` for a hosted proof
+server once you have one.
 
 ---
 
@@ -436,8 +440,11 @@ frontend also uses as a fallback for the contract address at build time.
 
 ## Live Demo
 
-> **URL:** `https://creator-authenticity-ledger.vercel.app`  
-> *(Available after Vercel deployment — see [Deploy](#deploy) section)*
+> **URL:** [https://creator-authenticity-ledger.vercel.app](https://creator-authenticity-ledger.vercel.app)
+>
+> The Brand portal on the live app queries the deployed contract's public state
+> directly from the Midnight indexer — try it with the contract address from
+> [§ Contract](#contract).
 
 ---
 

@@ -1,32 +1,57 @@
 import type { AppEnvironment, AuthenticityThresholds } from '@/types';
 import deployment from '../../deployment.json';
 
+/**
+ * Read a Vite env var, treating blank strings (e.g. an env var defined in the
+ * hosting dashboard with no value) as unset so the fallback applies.
+ */
+function envOr(value: string | undefined, fallback: string): string {
+  const v = (value ?? '').trim();
+  return v.length > 0 ? v : fallback;
+}
+
+function intEnv(value: string | undefined, fallback: number): number {
+  const n = parseInt((value ?? '').trim(), 10);
+  return Number.isFinite(n) ? n : fallback;
+}
+
 export function getEnvironment(): AppEnvironment {
-  const network = import.meta.env.VITE_NETWORK ?? deployment.network ?? 'preview';
+  const network = envOr(import.meta.env.VITE_NETWORK, deployment.network ?? 'preview');
   // The deployed contract address. Falls back to deployment.json (written by
   // the deploy script) when VITE_CONTRACT_ADDRESS is not set at build time.
-  const contractAddress =
-    import.meta.env.VITE_CONTRACT_ADDRESS ?? deployment.contractAddress ?? '';
-  const proofServerUrl = import.meta.env.VITE_PROOF_SERVER_URL ?? 'http://localhost:6300';
-  const indexerUrl =
-    import.meta.env.VITE_INDEXER_URL ?? 'https://indexer.preview.midnight.network/api/v4/graphql';
-  const indexerWsUrl =
-    import.meta.env.VITE_INDEXER_WS_URL ??
-    'wss://indexer.preview.midnight.network/api/v4/graphql/ws';
-  const nodeUrl = import.meta.env.VITE_NODE_URL ?? 'https://rpc.preview.midnight.network';
+  const contractAddress = envOr(
+    import.meta.env.VITE_CONTRACT_ADDRESS,
+    deployment.contractAddress ?? '',
+  );
+  const proofServerUrl = envOr(
+    import.meta.env.VITE_PROOF_SERVER_URL,
+    'http://localhost:6300',
+  );
+  const indexerUrl = envOr(
+    import.meta.env.VITE_INDEXER_URL,
+    'https://indexer.preview.midnight.network/api/v4/graphql',
+  );
+  const indexerWsUrl = envOr(
+    import.meta.env.VITE_INDEXER_WS_URL,
+    'wss://indexer.preview.midnight.network/api/v4/graphql/ws',
+  );
+  const nodeUrl = envOr(
+    import.meta.env.VITE_NODE_URL,
+    'https://rpc.preview.midnight.network',
+  );
 
   const thresholds: AuthenticityThresholds = {
-    minEngagementBps: parseInt(
-      import.meta.env.VITE_MIN_ENGAGEMENT_BPS ?? String(deployment.thresholds.minEngagementBps ?? 300),
-      10,
+    minEngagementBps: intEnv(
+      import.meta.env.VITE_MIN_ENGAGEMENT_BPS,
+      Number(deployment.thresholds?.minEngagementBps ?? 300),
     ),
-    minConsistency: parseInt(
-      import.meta.env.VITE_MIN_CONSISTENCY ?? String(deployment.thresholds.minConsistency ?? 60),
-      10,
+    minConsistency: intEnv(
+      import.meta.env.VITE_MIN_CONSISTENCY,
+      Number(deployment.thresholds?.minConsistency ?? 60),
     ),
-    minAudienceScore: parseInt(
-      import.meta.env.VITE_MIN_AUDIENCE_SCORE ?? String(deployment.thresholds.minAudienceScore ?? 70),
-      10,
+    minAudienceScore: intEnv(
+      import.meta.env.VITE_MIN_AUDIENCE_SCORE,
+      Number(deployment.thresholds?.minAudienceScore ?? 70),
     ),
   };
 
