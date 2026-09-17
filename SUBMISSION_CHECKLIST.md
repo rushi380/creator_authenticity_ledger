@@ -53,7 +53,7 @@ Complete audit of all Level 1–4 requirements.
 | 2.6 | Verifiable contract address | ✅ PASS | README.md § Contract + `deployment.json` |
 | 2.7 | README privacy claim | ✅ PASS | README.md § Privacy Model — What an Observer CANNOT Learn |
 | 2.8 | Live demo link | ✅ PASS | https://creator-authenticity-ledger.vercel.app |
-| 2.9 | Demo video instructions/script | ✅ PASS | `DEMO.md` — full 1-minute recording script |
+| 2.9 | Demo video recorded and published | ✅ PASS | [Loom demo video](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e) |
 | 2.10 | At least 8 meaningful commits | ✅ PASS | 15 commits in git history |
 
 ### Privacy Behavior Evidence
@@ -83,7 +83,7 @@ The privacy behavior is **architecturally enforced**, not cosmetic:
 | 3.9 | Live demo | ✅ PASS | https://creator-authenticity-ledger.vercel.app |
 | 3.10 | Test-output screenshot | ⚠️ MANUAL | Run `npm test` → capture → `evidence/tests-passing.png` |
 | 3.11 | CI/CD badge/workflow evidence | ✅ PASS | CI badge in README.md (update URL after push) |
-| 3.12 | 1-minute demo video plan | ✅ PASS | `DEMO.md` — complete script with timestamps |
+| 3.12 | 1-minute demo video recorded | ✅ PASS | [Loom demo video](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e) — script in `DEMO.md` |
 | 3.13 | README privacy model section | ✅ PASS | README.md § Privacy Model |
 | 3.14 | Product proposal documentation | ✅ PASS | README.md § Product Proposal |
 
@@ -113,7 +113,7 @@ The README accurately describes only what Midnight actually provides:
 | 4.9 | Live demo link | ✅ PASS | https://creator-authenticity-ledger.vercel.app |
 | 4.10 | Contract address in README | ✅ PASS | README.md § Contract — real address + TX hash |
 | 4.11 | CI/CD badge/workflow | ✅ PASS | Badge in README.md (update GitHub username) |
-| 4.12 | Demo video plan | ✅ PASS | `DEMO.md` |
+| 4.12 | Demo video | ✅ PASS | [Loom demo video](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e) |
 | 4.13 | Minimum 15 meaningful commits | ✅ PASS | 15 commits with descriptive messages |
 
 ---
@@ -149,7 +149,7 @@ The README accurately describes only what Midnight actually provides:
 | 10 | Update CI badge | Replace `YOUR_GITHUB_USERNAME` in README badge URLs |
 | 11 | Capture screenshots | See `evidence/README.md` for what to capture |
 | 12 | Create X profile | Follow `PRODUCT_X.md` instructions |
-| 13 | Record demo video | Follow `DEMO.md` script |
+| 13 | Record demo video | ✅ Done — [Loom demo video](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e) |
 
 ---
 

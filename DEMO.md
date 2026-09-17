@@ -1,5 +1,7 @@
 # Creator Authenticity Ledger — 1-Minute Demo Script
 
+> **▶ Recorded demo:** [Watch on Loom](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e)
+
 ## Overview
 
 This script guides a 60-second screen recording that demonstrates:

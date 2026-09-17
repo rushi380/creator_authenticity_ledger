@@ -14,6 +14,7 @@
 Creator Authenticity Ledger is a privacy-preserving dApp that solves influencer fraud using Midnight's zero-knowledge architecture. A creator can prove that their engagement metrics satisfy authenticity thresholds — without disclosing their follower count, engagement figures, or any other sensitive data. Brands receive only a cryptographic verification result recorded on-chain.
 
 **Live App:** [https://creator-authenticity-ledger.vercel.app](https://creator-authenticity-ledger.vercel.app)  
+**Demo Video:** [Watch on Loom](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e)  
 **Deployed Contract:** See [Contract](#contract) section below  
 **X / Product Profile:** See [X Profile](#x--product-profile) section below
 
@@ -530,7 +531,9 @@ GitHub Actions runs on every push to `main` and every pull request:
 
 ## Demo Video
 
-See [`DEMO.md`](DEMO.md) for the full 1-minute recording script.
+**▶ Watch the live demo:** [Loom — Creator Authenticity Ledger Demo](https://www.loom.com/share/29bd6a8a010b43c589b3b748563df61e)
+
+The recording script is in [`DEMO.md`](DEMO.md).
 
 **Summary:**
 - 0:00 — Open application, show landing page
