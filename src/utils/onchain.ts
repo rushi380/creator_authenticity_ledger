@@ -208,21 +208,25 @@ export async function proveCreatorAuthenticityOnChain(
     );
 
     const compiledContract = buildCompiledContract(metrics);
+    // findDeployedContract also verifies the local ZK artifacts against the
+    // deployed contract's on-chain verifier keys, so a successful return here
+    // means the app is pointed at the right contract.
     const found = await findDeployedContract(providers as any, {
       compiledContract,
       contractAddress: env.contractAddress,
       privateStateId: PRIVATE_STATE_ID,
       initialPrivateState: INITIAL_PRIVATE_STATE,
     } as any);
-    const deployedContract = (found as any).contract as {
-      callTx: { proveAuthenticity: () => Promise<{ public: { txHash: string } }> };
+    // midnight-js v4 exposes the call interface directly on the found contract.
+    const callTx = (found as any).callTx as {
+      proveAuthenticity: () => Promise<{ public: { txHash: string } }>;
     };
 
     // Locally executes the circuit, generates the ZK proof, has the wallet
     // balance + sign + pay fees, relays through the wallet, and waits for
     // finalization. Step callbacks fire from the instrumented providers.
     onStepChange('executing_circuit');
-    const callResult = await deployedContract.callTx.proveAuthenticity();
+    const callResult = await callTx.proveAuthenticity();
 
     onStepChange('verified');
     return {
