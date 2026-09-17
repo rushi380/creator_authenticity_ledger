@@ -277,10 +277,15 @@ creator-authenticity-ledger/
 ## Installation
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USERNAME/creator-authenticity-ledger.git
-cd creator-authenticity-ledger
+git clone https://github.com/rushi380/creator_authenticity_ledger.git
+cd creator_authenticity_ledger
 npm install
 ```
+
+> `npm run setup` in the documentation you received belongs to a different
+> Midnight CLI sample. This repository does not include that sample's local
+> devnet, interactive CLI, `.midnight-state.json`, `npm run cli`, or
+> `npm run test:e2e` commands. Use the deployment flow below for this project.
 
 ---
 
@@ -371,16 +376,23 @@ npm run copy:artifacts     # managed/ → public/
 ### Preprod Deployment
 
 1. Install Compact CLI (see above)
-2. Compile the contract: `npm run compile:contract`
-3. Start Docker proof server
-4. Fund your Lace Wallet on Midnight Preprod
-5. Set `WALLET_MNEMONIC` in your environment (**never commit this**)
-6. Run: `node scripts/deploy.cjs`
-7. Copy the resulting contract address into `.env` as `VITE_CONTRACT_ADDRESS`
+2. Run `npm run setup` to install dependencies and compile/copy the contract artifacts
+3. Start Docker proof server: `docker run -d --name midnight-proof-server -p 6300:6300 midnightntwrk/proof-server:8.1.0`
+4. Run `npm run deploy:dryrun` to check the artifacts and proof server
+5. Fund your wallet on Midnight Preprod
+6. Set `WALLET_SEED` in your WSL environment (**never commit or paste this into chat**)
+7. Run `npm run deploy:preprod`
+8. Copy the resulting contract address into `.env` as `VITE_CONTRACT_ADDRESS`
 
 ```bash
-WALLET_MNEMONIC="word1 word2 ... word24" node scripts/deploy.cjs
+read -rsp "Wallet seed: " WALLET_SEED; echo
+export WALLET_SEED
+npm run deploy:preprod
 ```
+
+If Docker is mapped to another host port, set `VITE_PROOF_SERVER_URL` to that
+port before running the dry run and deploy command, for example:
+`VITE_PROOF_SERVER_URL=http://localhost:6301`.
 
 ### Frontend Deployment (Vercel)
 

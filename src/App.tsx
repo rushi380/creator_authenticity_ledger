@@ -22,7 +22,7 @@ function Footer() {
           <div className="flex flex-col items-end gap-1">
             {contractAddress && (
               <p className="text-xs text-gray-500 font-mono">
-                Preprod: {contractAddress.slice(0, 16)}…
+                Preview: {contractAddress.slice(0, 16)}…
               </p>
             )}
             <p className="text-xs text-gray-600">
@@ -36,7 +36,7 @@ function Footer() {
 }
 
 export default function App() {
-  const { walletState, connect, disconnect } = useWallet();
+  const { walletState, connect, disconnect, availableWallets } = useWallet();
 
   return (
     <BrowserRouter>
@@ -45,6 +45,7 @@ export default function App() {
           walletState={walletState}
           onConnect={connect}
           onDisconnect={disconnect}
+          availableWallets={availableWallets}
         />
         <div className="flex-1">
           <Routes>

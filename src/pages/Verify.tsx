@@ -73,7 +73,7 @@ export function Verify({ walletState, onConnect, onDisconnect }: VerifyProps) {
         </h1>
         <p className="text-gray-400 mb-8">
           Your creator authenticity has been proven using a zero-knowledge proof.
-          The verification result is recorded on Midnight Preprod.
+          The verification result is recorded on Midnight Preview.
         </p>
 
         {/* What's public — what's hidden */}
@@ -272,7 +272,7 @@ export function Verify({ walletState, onConnect, onDisconnect }: VerifyProps) {
               </Button>
               {walletState.status !== 'connected' && (
                 <p className="text-center text-xs text-gray-500 mt-2">
-                  Connect your Lace wallet to submit the authenticity proof
+                  Connect your wallet to submit the authenticity proof
                 </p>
               )}
             </div>

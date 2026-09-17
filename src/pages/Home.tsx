@@ -17,7 +17,7 @@ export function Home({ walletState, onConnect }: HomeProps) {
     {
       icon: '✅',
       title: 'On-Chain Verification',
-      description: 'Brands receive a verifiable authenticity result recorded on Midnight Preprod.',
+      description: 'Brands receive a verifiable authenticity result recorded on Midnight Preview.',
     },
     {
       icon: '🌐',
@@ -44,7 +44,7 @@ export function Home({ walletState, onConnect }: HomeProps) {
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 text-center">
           <Badge variant="private" className="mb-6">
-            🌙 Built on Midnight Network · Preprod
+            🌙 Built on Midnight Network · Preview
           </Badge>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
@@ -77,7 +77,7 @@ export function Home({ walletState, onConnect }: HomeProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                     d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>
-                Connect Lace Wallet
+                Connect Wallet
               </Button>
             )}
             <Link to="/brand">
@@ -92,7 +92,7 @@ export function Home({ walletState, onConnect }: HomeProps) {
             <div className="mt-8 inline-flex items-center gap-2 px-4 py-2 rounded-full
               bg-gray-900/80 border border-gray-700 text-xs text-gray-400 font-mono">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              Preprod: {contractAddress.slice(0, 12)}…{contractAddress.slice(-8)}
+              Preview: {contractAddress.slice(0, 12)}…{contractAddress.slice(-8)}
             </div>
           )}
         </div>

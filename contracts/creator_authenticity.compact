@@ -1,4 +1,4 @@
-pragma language_version 0.23;
+pragma language_version 0.22;
 
 import CompactStandardLibrary;
 
@@ -97,11 +97,11 @@ export circuit proveAuthenticity(): [] {
 
   // All checks passed — disclose only the boolean result
   isAuthentic = disclose(true);
-  verificationCount = disclose(verificationCount + (1 as Uint<32>));
+  verificationCount = disclose((verificationCount + 1) as Uint<32>);
 }
 
 // ── Reset circuit (owner can reset verification for re-submission) ────────────
 export circuit resetVerification(): [] {
   isAuthentic       = disclose(false);
-  verificationCount = disclose(verificationCount + (1 as Uint<32>));
+  verificationCount = disclose((verificationCount + 1) as Uint<32>);
 }

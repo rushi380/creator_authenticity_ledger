@@ -1,0 +1,11 @@
+{
+  "network": "preview",
+  "contractAddress": "c006cf208c80169aaa39ea787e1413a5451aeb4f1d121d65ba9e1b6f6a8c2a79",
+  "txHash": "9d3010d344a178f8385b02911b2596f8f49bba7f40c644a5afc3a191d9036499",
+  "deployedAt": "2026-09-15T19:30:52.392Z",
+  "thresholds": {
+    "minEngagementBps": 300,
+    "minConsistency": 60,
+    "minAudienceScore": 70
+  }
+}

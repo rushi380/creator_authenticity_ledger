@@ -20,6 +20,8 @@ build/
 *.key
 wallet-seed.txt
 deployment-wallet.json
+.wallet-cache/
+.private-state/
 
 # TypeScript build info
 *.tsbuildinfo

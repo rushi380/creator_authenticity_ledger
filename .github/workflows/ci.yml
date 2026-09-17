@@ -114,7 +114,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint-typecheck]
     env:
-      VITE_NETWORK: preprod
+      VITE_NETWORK: preview
       VITE_CONTRACT_ADDRESS: ${{ secrets.VITE_CONTRACT_ADDRESS }}
       VITE_PROOF_SERVER_URL: http://localhost:6300
       VITE_MIN_ENGAGEMENT_BPS: '300'

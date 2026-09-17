@@ -2,10 +2,10 @@ import { Card, CardContent, Badge } from '@/components/ui';
 
 export function About() {
   const techStack = [
-    { layer: 'Blockchain', tech: 'Midnight Network (Preprod)' },
+    { layer: 'Blockchain', tech: 'Midnight Network (Preview)' },
     { layer: 'Smart Contract Language', tech: 'Compact v0.23+' },
     { layer: 'ZK Runtime', tech: '@midnight-ntwrk/compact-runtime' },
-    { layer: 'Wallet', tech: 'Lace Wallet (Midnight edition)' },
+    { layer: 'Wallet', tech: 'Lace Wallet / 1AM Wallet (Midnight edition)' },
     { layer: 'Frontend', tech: 'React 19 + TypeScript + Vite' },
     { layer: 'Styling', tech: 'Tailwind CSS' },
     { layer: 'Proof Server', tech: 'Midnight Docker proof server' },
@@ -98,7 +98,7 @@ export function About() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-400">Network</span>
-                <Badge variant="info">Midnight Preprod</Badge>
+                <Badge variant="info">Midnight Preview</Badge>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-400">Contract Address</span>

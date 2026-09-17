@@ -24,7 +24,9 @@ export function WalletStatus({ walletState, onConnect, onDisconnect }: WalletSta
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-white">Lace Wallet</span>
+                  <span className="text-sm font-semibold text-white">
+                    {walletState.walletName || 'Wallet'}
+                  </span>
                   <Badge variant="success" pulse>Connected</Badge>
                 </div>
                 <div className="flex items-center gap-3 mt-0.5">
@@ -64,13 +66,13 @@ export function WalletStatus({ walletState, onConnect, onDisconnect }: WalletSta
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-white">Lace Wallet</span>
+                <span className="text-sm font-semibold text-white">Wallet</span>
                 <Badge variant={walletState.status === 'error' ? 'error' : 'neutral'}>
                   {walletState.status === 'error' ? 'Error' : 'Not Connected'}
                 </Badge>
               </div>
               <p className="text-xs text-gray-500 mt-0.5">
-                {walletState.error ?? 'Connect your Lace wallet to proceed'}
+                {walletState.error ?? 'Connect your wallet to proceed'}
               </p>
             </div>
           </div>

@@ -128,7 +128,7 @@ Tech stack:
 • Lace Wallet integration
 • GitHub Actions CI/CD
 
-Repo: github.com/rushi380/creator_authenticity_ledger
+Repo: https://github.com/rushi380/creator_authenticity_ledger.git
 ```
 
 ---

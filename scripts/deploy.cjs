@@ -1,7 +1,7 @@
 /**
  * deploy.cjs
  *
- * Deploys the Creator Authenticity Ledger contract to Midnight Preprod.
+ * Deploys the Creator Authenticity Ledger contract to Midnight Preview.
  *
  * Prerequisites:
  *   1. Compact toolchain installed (compact CLI)
@@ -9,13 +9,13 @@
  *   3. Artifacts copied:  npm run copy:artifacts
  *   4. .env created from .env.example with wallet mnemonic
  *   5. Docker running (proof server on port 6300)
- *   6. Lace wallet funded with DUST on Preprod
+ *   6. Lace wallet funded with DUST on Preview
  *
  * Usage:
  *   WALLET_MNEMONIC="word1 word2 ... word24" node scripts/deploy.cjs
  *
  * The script will:
- *   - Connect to Midnight Preprod
+ *   - Connect to Midnight Preview
  *   - Deploy the contract with default thresholds
  *   - Write deployment.json with contract address
  *   - Update .env with VITE_CONTRACT_ADDRESS
@@ -30,10 +30,10 @@ const ROOT = path.resolve(__dirname, '..');
 
 // ── Configuration ─────────────────────────────────────────────────────────────
 const CONFIG = {
-  network:          process.env.VITE_NETWORK          ?? 'preprod',
+  network:          process.env.VITE_NETWORK          ?? 'preview',
   proofServerUrl:   process.env.VITE_PROOF_SERVER_URL ?? 'http://localhost:6300',
-  indexerUrl:       process.env.VITE_INDEXER_URL      ?? 'https://indexer.midnight.network/api/v1/graphql',
-  nodeUrl:          process.env.VITE_NODE_URL         ?? 'https://rpc.midnight.network',
+  indexerUrl:       process.env.VITE_INDEXER_URL      ?? 'https://indexer.preview.midnight.network/api/v4/graphql',
+  nodeUrl:          process.env.VITE_NODE_URL         ?? 'https://rpc.preview.midnight.network',
   minEngagementBps: parseInt(process.env.VITE_MIN_ENGAGEMENT_BPS ?? '300', 10),
   minConsistency:   parseInt(process.env.VITE_MIN_CONSISTENCY    ?? '60',  10),
   minAudienceScore: parseInt(process.env.VITE_MIN_AUDIENCE_SCORE ?? '70',  10),
@@ -47,7 +47,7 @@ function ok(msg)   { console.log(`  ✅ ${msg}`); }
 function fail(msg) { console.error(`  ❌ ${msg}`); process.exit(1); }
 
 // ── Pre-flight checks ─────────────────────────────────────────────────────────
-console.log('\n🚀 Creator Authenticity Ledger — Preprod Deployment\n');
+console.log('\n🚀 Creator Authenticity Ledger — Preview Deployment\n');
 console.log(`   Network:      ${CONFIG.network}`);
 console.log(`   Proof Server: ${CONFIG.proofServerUrl}`);
 console.log(`   Indexer:      ${CONFIG.indexerUrl}`);
@@ -135,7 +135,7 @@ console.log('──────────────────────�
 console.log('  The Midnight deployment requires:');
 console.log('    • Compact CLI (Linux/WSL)');
 console.log('    • Docker (proof server)');
-console.log('    • Funded Lace Wallet on Preprod');
+console.log('    • Funded Lace Wallet on Preview');
 console.log('');
 console.log('  Full instructions: deployment.json');
 console.log('  After deployment, set in .env:');

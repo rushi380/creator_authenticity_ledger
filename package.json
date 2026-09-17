@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "description": "Privacy-preserving creator authenticity verification on Midnight Network",
   "private": true,
+  "repository": "https://github.com/rushi380/creator_authenticity_ledger.git",
+  "homepage": "https://github.com/rushi380/creator_authenticity_ledger",
   "type": "module",
   "scripts": {
+    "setup": "npm install && npm run build:contract",
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
@@ -15,25 +18,34 @@
     "compile:contract": "compact compile contracts/creator_authenticity.compact ./managed",
     "copy:artifacts": "node scripts/copy-artifacts.cjs",
     "build:contract": "npm run compile:contract && npm run copy:artifacts",
-    "deploy:preprod": "node scripts/deploy.cjs",
+    "deploy:dryrun": "node scripts/deploy-dryrun.mjs",
+    "deploy:preview": "node scripts/deploy-preprod.mjs",
+    "deploy:preprod": "node scripts/deploy-preprod.mjs",
     "clean": "rimraf dist managed public/keys public/zkir"
   },
   "dependencies": {
+    "@midnight-ntwrk/midnight-js-http-client-proof-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-indexer-public-data-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-level-private-state-provider": "^4.1.1",
+    "@midnight-ntwrk/midnight-js-node-zk-config-provider": "^4.1.1",
+    "@midnight-ntwrk/wallet-sdk": "^1.2.0",
+    "bip39": "^3.1.0",
+    "framer-motion": "^11.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^6.22.0",
-    "framer-motion": "^11.0.0"
+    "ws": "^8.18.0"
   },
   "optionalDependencies": {
-    "@midnight-ntwrk/compact-runtime": "0.19.0",
+    "@midnight-ntwrk/compact-runtime": "0.15.0",
     "@midnight-ntwrk/midnight-js-contracts": "4.1.1",
-    "@midnight-ntwrk/midnight-js-types": "4.1.1",
-    "@midnight-ntwrk/midnight-js-network-id": "4.1.1"
+    "@midnight-ntwrk/midnight-js-network-id": "4.1.1",
+    "@midnight-ntwrk/midnight-js-types": "4.1.1"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
-    "@types/node": "^22.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
     "@vitejs/plugin-react": "^4.2.0",

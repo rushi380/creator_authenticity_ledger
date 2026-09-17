@@ -30,7 +30,7 @@ Complete audit of all Level 1–4 requirements.
 
 | # | Requirement | Status | Evidence / Location |
 |---|---|---|---|
-| 1.11 | Public GitHub repository | ✅ PASS | https://github.com/rushi380/creator_authenticity_ledger |
+| 1.11 | Public GitHub repository | ✅ PASS | https://github.com/rushi380/creator_authenticity_ledger.git |
 | 1.12 | README.md | ✅ PASS | `README.md` — complete |
 | 1.13 | Local setup instructions | ✅ PASS | README.md § Installation, § Local Development |
 | 1.14 | Screenshot of successful compile output | ⚠️ MANUAL | Capture after: `npm run compile:contract` → `evidence/compile-success.png` |
@@ -137,7 +137,7 @@ The README accurately describes only what Midnight actually provides:
 
 | Priority | Action | Command / Notes |
 |---|---|---|
-| 1 | Push to GitHub | ✅ Done — `https://github.com/rushi380/creator_authenticity_ledger` |
+| 1 | Push to GitHub | ✅ Done — `https://github.com/rushi380/creator_authenticity_ledger.git` |
 | 2 | Install Compact CLI (Linux/WSL) | `curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/latest/download/compact-installer.sh \| sh` |
 | 3 | Compile contract | `npm run compile:contract` |
 | 4 | Start Docker proof server | `docker run -d -p 6300:6000 midnightnetwork/proof-server:latest` |

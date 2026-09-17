@@ -10,7 +10,7 @@ const DEMO_RECORDS: BrandVerificationRecord[] = [
     verificationId: 'ver_demo_001',
     result: 'AUTHENTIC',
     timestamp: Date.now() - 3600000,
-    network: 'preprod',
+    network: 'preview',
   },
 ];
 
@@ -89,7 +89,7 @@ export function Brand() {
                   value={contractAddr}
                   onChange={e => setContractAddr(e.target.value)}
                   placeholder="0x…"
-                  hint="Midnight Preprod contract address"
+                  hint="Midnight Preview contract address"
                 />
                 <Button
                   type="submit"

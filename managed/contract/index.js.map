@@ -1,0 +1,8 @@
+{
+  "version": 3,
+  "file": "index.js",
+  "sourceRoot": "../../",
+  "sources": ["contracts/creator_authenticity.compact"],
+  "names": [],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EAuCA;;;;;;;;;;;;;;;;;;;;;;MAsBA,AAAA,iBAuCC;;;;;;;;;;;;;;;;;;;;;;OAAA;MAGD,AAAA,iBAGC;;;;;;;;;;;;;;;;;;;;;;OAAA;;;;;;;;;;GAvDA;EAZD;;;;;UACE,iBAA0B;UAC1B,mBAA2B;UAC3B,iBAAyB;UACzB,mBAA2B;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;IAlB7B;;;;;;;;;yEAAwC;IACxC;;;;;;;;;yEAAmC;IACnC;;;;;;;;;yEAAyC;IACzC;;;;;;;;;yEAAuC;IACvC;;;;;;;;;yEAAyC;IACzC;;;;;;;;;yEAA0C;IAexC;;;;;;;2HAA6B,iBAAe;;yEAA9B;IACd;;;;;;;;;yEAAW;IACX;;;;;;;2HAA6B,mBAAiB;;yEAA9B;IAChB;;;;;;;2HAA6B,iBAAe;;yEAA9B;IACd;;;;;;;2HAA6B,mBAAiB;;yEAA9B;UAChB,KAAiB;IAAjB;;;;;;;2HAAA,KAAiB;;yEAAA;;;;;;;GAClB;EAlBD,AAAA,gBAAkC;;0DAAlC,aAAkC;;;;;;;;;;;;;;GAAA;EAClC,AAAA,yBAA2C;;0DAA3C,sBAA2C;;;;;;;;;;;;;;GAAA;EAC3C,AAAA,0BAA4C;;0DAA5C,uBAA4C;;;;;;;;;;;;;;GAAA;EAC5C,AAAA,wBAA0C;;0DAA1C,qBAA0C;;;;;;;;;;;;;;GAAA;EAyB1C,AAAA,oBAuCC;UArCO,WAA6B;UAC7B,SAAsC;UACtC,aAAuC;;UACvC,UAAqC;4BAGpC,WAAS;;4BAIT,aAAW;;4BAEX,UAAQ;;QAMb,GAA6D;mCAA7D,SAAO;6BAAP,GAA6D;;6BAA5B,WAAS;;qDAAG;;;;;;;;;;;0HAAgB;;4BAM7D,aAAW;;oDAAI;;;;;;;;;;;yHAAc;;4BAM7B,UAAQ;;oDAAI;;;;;;;;;;;yHAAgB;;IAK9B;;;;;;;;;yEAAW;UACX,KAAiB;;;;;6CAAa;;;;;;;;;;;kHAAiB;;;IAA/C;;;;;;;2HAAA,KAAiB;;yEAAA;;GAClB;EAGD,AAAA,oBAGC;IAFC;;;;;;;;;yEAAW;UACX,KAAiB;;;;;6CAAa;;;;;;;;;;;kHAAiB;;;IAA/C;;;;;;;2HAAA,KAAiB;;yEAAA;;GAClB;;;;;;;;;;;;;;;;IAjFD;qCAAA;;;;;;;;;;;0GAAwC;KAAA;IACxC;qCAAA;;;;;;;;;;;0GAAmC;KAAA;IACnC;qCAAA;;;;;;;;;;;0GAAyC;KAAA;IACzC;qCAAA;;;;;;;;;;;0GAAuC;KAAA;IACvC;qCAAA;;;;;;;;;;;0GAAyC;KAAA;IACzC;qCAAA;;;;;;;;;;;0GAA0C;KAAA;;;;;;;;;;;;;;;"
+}

@@ -1,15 +1,16 @@
 import { Link, useLocation } from 'react-router-dom';
 import { Button, Badge } from './ui';
-import type { WalletState } from '@/types';
+import type { WalletState, WalletInfo } from '@/types';
 import { formatAddress, getNetworkLabel } from '@/utils/environment';
 
 interface NavbarProps {
   walletState: WalletState;
-  onConnect: () => void;
+  onConnect: (walletId?: string) => void;
   onDisconnect: () => void;
+  availableWallets: WalletInfo[];
 }
 
-export function Navbar({ walletState, onConnect, onDisconnect }: NavbarProps) {
+export function Navbar({ walletState, onConnect, onDisconnect, availableWallets }: NavbarProps) {
   const location = useLocation();
 
   const navLinks = [
@@ -19,6 +20,8 @@ export function Navbar({ walletState, onConnect, onDisconnect }: NavbarProps) {
     { to: '/privacy', label: 'Privacy'  },
     { to: '/about',   label: 'About'    },
   ];
+
+  const showWalletSelector = availableWallets.length > 1 && walletState.status !== 'connected';
 
   return (
     <nav className="sticky top-0 z-50 border-b border-gray-800/60 bg-gray-950/90 backdrop-blur-md">
@@ -61,6 +64,11 @@ export function Navbar({ walletState, onConnect, onDisconnect }: NavbarProps) {
                 <div className="hidden sm:flex flex-col items-end">
                   <div className="flex items-center gap-1.5">
                     <Badge variant="success" pulse>Connected</Badge>
+                    {walletState.walletName && (
+                      <span className="text-xs text-violet-400 font-medium">
+                        {walletState.walletName}
+                      </span>
+                    )}
                     {walletState.network && (
                       <span className="text-xs text-gray-500">
                         {getNetworkLabel(walletState.network)}
@@ -82,14 +90,28 @@ export function Navbar({ walletState, onConnect, onDisconnect }: NavbarProps) {
                 </Button>
               </div>
             ) : (
-              <Button
-                variant="primary"
-                size="sm"
-                loading={walletState.status === 'connecting'}
-                onClick={onConnect}
-              >
-                {walletState.status === 'connecting' ? 'Connecting…' : 'Connect Wallet'}
-              </Button>
+              <div className="flex items-center gap-2">
+                {showWalletSelector && (
+                  <select
+                    className="bg-gray-800 border border-gray-700 text-white text-xs rounded-lg px-2 py-1.5 focus:ring-violet-500 focus:border-violet-500"
+                    onChange={e => onConnect(e.target.value)}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>Select wallet</option>
+                    {availableWallets.map(w => (
+                      <option key={w.id} value={w.id}>{w.name}</option>
+                    ))}
+                  </select>
+                )}
+                <Button
+                  variant="primary"
+                  size="sm"
+                  loading={walletState.status === 'connecting'}
+                  onClick={() => onConnect()}
+                >
+                  {walletState.status === 'connecting' ? 'Connecting…' : 'Connect Wallet'}
+                </Button>
+              </div>
             )}
           </div>
         </div>

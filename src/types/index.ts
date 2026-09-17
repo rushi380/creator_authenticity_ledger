@@ -5,27 +5,37 @@
 // Wallet connection state
 export type WalletStatus = 'disconnected' | 'connecting' | 'connected' | 'error';
 
+export interface WalletInfo {
+  id: string;
+  name: string;
+  icon: string;
+  apiVersion: string;
+}
+
 export interface WalletState {
   status: WalletStatus;
   address: string | null;
   balance: string | null;
   network: string | null;
   error: string | null;
+  walletId: string | null;
+  walletName: string | null;
 }
 
-// Midnight Lace Wallet API (window.midnight browser extension)
 export interface MidnightWalletAPI {
-  enable: (network: string) => Promise<MidnightWalletConnector>;
-  isEnabled: () => Promise<boolean>;
+  /** Reverse-DNS wallet identifier required by DApp Connector API v4. */
+  rdns?: string;
+  connect: (network: string) => Promise<MidnightWalletConnector>;
   apiVersion: string;
   name: string;
   icon: string;
 }
 
 export interface MidnightWalletConnector {
-  getUnshieldedAddress: () => Promise<string>;
-  getBalance: () => Promise<string>;
-  getNetworkId: () => Promise<string>;
+  getUnshieldedAddress: () => Promise<{ unshieldedAddress: string }>;
+  getUnshieldedBalances: () => Promise<Record<string, bigint>>;
+  getDustBalance: () => Promise<{ cap: bigint; balance: bigint }>;
+  getConfiguration: () => Promise<{ networkId: string }>;
   submitTransaction: (tx: unknown) => Promise<string>;
 }
 

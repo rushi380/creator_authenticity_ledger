@@ -1,11 +1,11 @@
 import type { AppEnvironment, AuthenticityThresholds } from '@/types';
 
 export function getEnvironment(): AppEnvironment {
-  const network = import.meta.env.VITE_NETWORK ?? 'preprod';
+  const network = import.meta.env.VITE_NETWORK ?? 'preview';
   const contractAddress = import.meta.env.VITE_CONTRACT_ADDRESS ?? '';
   const proofServerUrl = import.meta.env.VITE_PROOF_SERVER_URL ?? 'http://localhost:6300';
-  const indexerUrl = import.meta.env.VITE_INDEXER_URL ?? 'https://indexer.midnight.network/api/v1/graphql';
-  const nodeUrl = import.meta.env.VITE_NODE_URL ?? 'https://rpc.midnight.network';
+  const indexerUrl = import.meta.env.VITE_INDEXER_URL ?? 'https://indexer.preview.midnight.network/api/v4/graphql';
+  const nodeUrl = import.meta.env.VITE_NODE_URL ?? 'https://rpc.preview.midnight.network';
 
   const thresholds: AuthenticityThresholds = {
     minEngagementBps: parseInt(import.meta.env.VITE_MIN_ENGAGEMENT_BPS ?? '300', 10),

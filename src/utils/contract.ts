@@ -1,8 +1,8 @@
 /**
  * contract.ts
  *
- * Handles Lace wallet connection and Midnight contract interaction.
- * Uses the window.midnight browser extension API.
+ * Handles Lace and 1AM wallet connection and Midnight contract interaction.
+ * Uses the window.midnight browser extension API (DApp Connector API v4).
  *
  * Privacy model:
  *   - Private metrics are passed as witness callbacks — they execute locally
@@ -11,12 +11,51 @@
  */
 
 import type {
+  MidnightWalletAPI,
   MidnightWalletConnector,
   CreatorPrivateMetrics,
   WalletState,
   VerificationState,
   CreatorWitnessProvider,
+  WalletInfo,
 } from '@/types';
+
+// ── Wallet discovery ──────────────────────────────────────────────────────────
+
+/**
+ * The browser can expose more than one 1AM API.  Only the DApp Connector API
+ * uses `connect(networkId)`.  Its other connection surface accepts an options
+ * object containing `identifiers`, which is why calling every injected
+ * `connect` function with a network string fails after the approval prompt.
+ */
+export function isDappConnectorV4(api: unknown): api is MidnightWalletAPI {
+  if (!api || typeof api !== 'object') return false;
+
+  const candidate = api as Partial<MidnightWalletAPI>;
+  return typeof candidate.connect === 'function'
+    && typeof candidate.name === 'string'
+    && typeof candidate.rdns === 'string'
+    && typeof candidate.apiVersion === 'string'
+    && /^4(?:\.|$)/.test(candidate.apiVersion);
+}
+
+export function getAvailableWallets(): WalletInfo[] {
+  const midnight = (window as unknown as { midnight?: Record<string, MidnightWalletAPI> }).midnight;
+  if (!midnight) return [];
+
+  return Object.entries(midnight)
+    .filter(([, api]) => isDappConnectorV4(api))
+    .map(([id, api]) => ({
+      id,
+      name: api.name || id,
+      icon: api.icon || '',
+      apiVersion: api.apiVersion || 'unknown',
+    }));
+}
+
+function isOneAmWallet(wallet: MidnightWalletAPI): boolean {
+  return /\b1am\b/i.test(wallet.name) || wallet.rdns?.toLowerCase().includes('1am') === true;
+}
 
 // ── Wallet connection ─────────────────────────────────────────────────────────
 
@@ -24,42 +63,140 @@ export async function connectLaceWallet(network: string): Promise<{
   connector: MidnightWalletConnector;
   walletState: WalletState;
 }> {
-  const midnight = (window as unknown as { midnight?: Record<string, unknown> }).midnight;
+  const midnight = (window as unknown as { midnight?: Record<string, MidnightWalletAPI> }).midnight;
 
   if (!midnight) {
     throw new Error(
-      'Lace Wallet is not installed. Please install the Lace browser extension ' +
-      'and enable the Midnight feature.'
+      'No Midnight wallet is installed. Please install Lace or 1AM and enable the Midnight feature.'
     );
   }
 
-  const wallets = Object.values(midnight);
-  if (wallets.length === 0) {
-    throw new Error('No Midnight-compatible wallet found in Lace.');
+  const laceWallet = midnight.mnLace || midnight.lace;
+  if (!laceWallet?.connect) {
+    throw new Error('Lace Wallet is not installed. Please install the Lace browser extension.');
   }
 
-  // Use the first available wallet provider
-  const walletProvider = wallets[0] as {
-    enable?: (net: string) => Promise<MidnightWalletConnector>;
-    apiVersion?: string;
-    name?: string;
-  };
+  const connector = await laceWallet.connect(network);
+  const addressResult = await connector.getUnshieldedAddress().catch(() => ({ unshieldedAddress: '' }));
+  const unshieldedBalances = await connector.getUnshieldedBalances().catch(() => ({}));
+  const dustBalance = await connector.getDustBalance().catch(() => ({ cap: 0n, balance: 0n }));
+  const config = await connector.getConfiguration().catch(() => ({ networkId: network }));
 
-  if (!walletProvider?.enable) {
-    throw new Error('Wallet does not support the Midnight dApp connector API.');
-  }
-
-  const connector = await walletProvider.enable(network);
-  const address   = await connector.getUnshieldedAddress().catch(() => '');
-  const balance   = await connector.getBalance().catch(() => '0');
-  const netId     = await connector.getNetworkId().catch(() => network);
+  const nativeBalance = ('native' in unshieldedBalances ? unshieldedBalances['native'] : 0n);
+  const balanceDisplay = nativeBalance > 0n ? nativeBalance.toString() : dustBalance.balance.toString();
 
   const walletState: WalletState = {
     status:  'connected',
-    address: address || null,
-    balance: balance || null,
-    network: netId || network,
+    address: addressResult.unshieldedAddress || null,
+    balance: balanceDisplay || null,
+    network: config.networkId || network,
     error:   null,
+    walletId: 'mnLace',
+    walletName: 'Lace Wallet',
+  };
+
+  return { connector, walletState };
+}
+
+export async function connect1amWallet(network: string): Promise<{
+  connector: MidnightWalletConnector;
+  walletState: WalletState;
+}> {
+  const midnight = (window as unknown as { midnight?: Record<string, MidnightWalletAPI> }).midnight;
+
+  if (!midnight) {
+    throw new Error(
+      'No Midnight wallet is installed. Please install 1AM or Lace and enable the Midnight feature.'
+    );
+  }
+
+  const oneAmWallet = midnight['1am'];
+  if (!oneAmWallet?.connect) {
+    throw new Error('1AM Wallet is not installed. Please install the 1AM browser extension.');
+  }
+
+  const connector = await oneAmWallet.connect(network);
+  const addressResult = await connector.getUnshieldedAddress().catch(() => ({ unshieldedAddress: '' }));
+  const unshieldedBalances = await connector.getUnshieldedBalances().catch(() => ({}));
+  const dustBalance = await connector.getDustBalance().catch(() => ({ cap: 0n, balance: 0n }));
+  const config = await connector.getConfiguration().catch(() => ({ networkId: network }));
+
+  const nativeBalance = ('native' in unshieldedBalances ? unshieldedBalances['native'] : 0n);
+  const balanceDisplay = nativeBalance > 0n ? nativeBalance.toString() : dustBalance.balance.toString();
+
+  const walletState: WalletState = {
+    status:  'connected',
+    address: addressResult.unshieldedAddress || null,
+    balance: balanceDisplay || null,
+    network: config.networkId || network,
+    error:   null,
+    walletId: '1am',
+    walletName: '1AM Wallet',
+  };
+
+  return { connector, walletState };
+}
+
+export async function connectWalletByid(
+  walletId: string,
+  network: string
+): Promise<{
+  connector: MidnightWalletConnector;
+  walletState: WalletState;
+}> {
+  const midnight = (window as unknown as { midnight?: Record<string, MidnightWalletAPI> }).midnight;
+
+  if (!midnight) {
+    throw new Error(
+      'No Midnight wallet is installed. Please install Lace or 1AM and enable the Midnight feature.'
+    );
+  }
+
+  const wallet = midnight[walletId];
+  if (!isDappConnectorV4(wallet)) {
+    throw new Error(
+      `Wallet "${walletId}" does not expose a compatible Midnight DApp Connector v4 API.`
+    );
+  }
+
+  const connector = await wallet.connect(network);
+
+  // 1AM 6.3.11 currently throws inside its own permission UI while processing
+  // the standard parameterless getUnshieldedAddress() request. A connection
+  // itself does not require an address or balance, so do not make that
+  // optional read part of the connection handshake.
+  if (isOneAmWallet(wallet)) {
+    const config = await connector.getConfiguration().catch(() => ({ networkId: network }));
+    return {
+      connector,
+      walletState: {
+        status: 'connected',
+        address: null,
+        balance: null,
+        network: config.networkId || network,
+        error: null,
+        walletId,
+        walletName: wallet.name || walletId,
+      },
+    };
+  }
+
+  const addressResult = await connector.getUnshieldedAddress().catch(() => ({ unshieldedAddress: '' }));
+  const unshieldedBalances = await connector.getUnshieldedBalances().catch(() => ({}));
+  const dustBalance = await connector.getDustBalance().catch(() => ({ cap: 0n, balance: 0n }));
+  const config = await connector.getConfiguration().catch(() => ({ networkId: network }));
+
+  const nativeBalance = ('native' in unshieldedBalances ? unshieldedBalances['native'] : 0n);
+  const balanceDisplay = nativeBalance > 0n ? nativeBalance.toString() : dustBalance.balance.toString();
+
+  const walletState: WalletState = {
+    status:  'connected',
+    address: addressResult.unshieldedAddress || null,
+    balance: balanceDisplay || null,
+    network: config.networkId || network,
+    error:   null,
+    walletId,
+    walletName: wallet.name || walletId,
   };
 
   return { connector, walletState };

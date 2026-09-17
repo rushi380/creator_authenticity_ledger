@@ -30,7 +30,7 @@ export function Privacy() {
           <CardContent>
             <ul className="space-y-3 text-sm text-gray-300">
               {[
-                { icon: '✓', text: 'Contract address exists on Midnight Preprod' },
+                { icon: '✓', text: 'Contract address exists on Midnight Preview' },
                 { icon: '✓', text: 'Binary authenticity result (true or false)' },
                 { icon: '✓', text: 'Public threshold configuration values' },
                 { icon: '✓', text: 'Total number of verifications performed' },
