@@ -67,6 +67,7 @@ export function buildProviders(
     onProving?: () => void;
     onBalancing?: () => void;
     onSubmitted?: () => void;
+    onSubmittedInfo?: (info: { id: string; hash: string }) => void;
   },
 ): MidnightProviders {
   setNetworkId(env.network);
@@ -106,7 +107,11 @@ export function buildProviders(
       // transaction for this — the hash does not match the indexer's
       // identifier lookup and would make the wait poll forever.
       const ids = (tx as { identifiers?: () => string[] }).identifiers?.() ?? [];
-      return ids.length > 0 ? ids[ids.length - 1] : tx.transactionHash();
+      const id = ids.length > 0 ? ids[ids.length - 1] : tx.transactionHash();
+      const hash = tx.transactionHash();
+      console.info('[onchain] transaction submitted — id:', id, '| hash:', hash);
+      hooks?.onSubmittedInfo?.({ id, hash });
+      return id;
     },
   };
 
@@ -301,11 +306,21 @@ export async function proveCreatorAuthenticityOnChain(
   const attempt = async (activeConnector: MidnightWalletConnector): Promise<OnChainProveResult> => {
     onStepChange('preparing');
     await assertProofServerReachable(env.proofServerUrl);
+
+    // Baseline on-chain verification counter — the fallback finalization
+    // watcher detects our own transaction by this counter increasing.
+    const baselineState = await readOnChainState(env);
+    const submittedRef: { id: string | null; hash: string | null } = { id: null, hash: null };
+
     const providers = await withWalletKeys(
       buildProviders(activeConnector, env, {
         onProving: () => onStepChange('generating_proof'),
         onBalancing: () => onStepChange('submitting'),
         onSubmitted: () => onStepChange('confirmed'),
+        onSubmittedInfo: (info) => {
+          submittedRef.id = info.id;
+          submittedRef.hash = info.hash;
+        },
       }),
       activeConnector,
     );
@@ -329,15 +344,84 @@ export async function proveCreatorAuthenticityOnChain(
     // balance + sign + pay fees, relays through the wallet, and waits for
     // finalization. Step callbacks fire from the instrumented providers.
     onStepChange('executing_circuit');
-    const callResult = await callTx.proveAuthenticity();
+    const callTxPromise = callTx.proveAuthenticity();
+    // Swallow late rejections if the fallback watcher below wins the race.
+    callTxPromise.catch(() => {});
 
-    onStepChange('verified');
-    return {
-      success: true,
-      txHash: callResult.public.txHash,
-      contractAddress: env.contractAddress,
-      error: null,
-    };
+    // ── Fallback finalization watcher ────────────────────────────────────
+    // If the SDK's indexer wait stalls (poller quirks, indexer lag), watch
+    // the contract's public state ourselves: a rising verificationCount is
+    // direct on-chain proof that this verification was finalized.
+    const POLL_MS = 4000;
+    const MAX_POLLS = 75; // ~5 minutes
+    let polls = 0;
+    const fallbackPromise = new Promise<OnChainProveResult>((resolve) => {
+      const timer = setInterval(async () => {
+        polls += 1;
+        try {
+          const state = await readOnChainState(env);
+          if (
+            baselineState &&
+            state &&
+            state.verificationCount > baselineState.verificationCount
+          ) {
+            clearInterval(timer);
+            onStepChange('verified');
+            resolve({
+              success: true,
+              txHash: submittedRef.hash,
+              contractAddress: env.contractAddress,
+              error: null,
+            });
+            return;
+          }
+        } catch {
+          // transient indexer errors — keep polling
+        }
+        if (polls >= MAX_POLLS) {
+          clearInterval(timer);
+          resolve({
+            success: false,
+            txHash: submittedRef.hash,
+            contractAddress: env.contractAddress,
+            error:
+              'Finalization was not observed within 5 minutes. The transaction may still ' +
+              'have landed — check the Brands page: if "Verifications Recorded" increased, ' +
+              'the verification succeeded on-chain.',
+          });
+        }
+      }, POLL_MS);
+    });
+
+    const race = await Promise.race([
+      callTxPromise.then(
+        (callResult): { kind: 'sdk'; result: OnChainProveResult } => ({
+          kind: 'sdk',
+          result: {
+            success: true,
+            txHash: callResult.public.txHash,
+            contractAddress: env.contractAddress,
+            error: null,
+          },
+        }),
+      ),
+      fallbackPromise.then(
+        (result): { kind: 'fallback'; result: OnChainProveResult } => ({
+          kind: 'fallback',
+          result,
+        }),
+      ),
+    ]);
+
+    if (race.kind === 'sdk') {
+      onStepChange('verified');
+      return race.result;
+    }
+    if (race.result.success) {
+      return race.result;
+    }
+    // The fallback timed out — surface its message as a failure.
+    throw new Error(race.result.error ?? 'Finalization wait timed out');
   };
 
   try {
