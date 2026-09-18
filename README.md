@@ -9,6 +9,22 @@
 
 ---
 
+## App Preview
+
+**Landing page** — connect a Midnight wallet and jump into verification:
+
+![Home — Creator Authenticity Ledger landing page](docs/screenshots/home.png)
+
+**Creator verification result** — the ZK proof is confirmed on-chain; the public outcome is visible while the creator's private metrics stay redacted:
+
+![Verify — Authenticity cryptographically verified with private values hidden](docs/screenshots/verify-success.png)
+
+**Brand portal** — brands query the on-chain verification state and see only the binary result, thresholds, and counters:
+
+![Brands — Brand Verification Portal querying on-chain state](docs/screenshots/brand-portal.png)
+
+---
+
 ## Overview
 
 Creator Authenticity Ledger is a privacy-preserving dApp that solves influencer fraud using Midnight's zero-knowledge architecture. A creator can prove that their engagement metrics satisfy authenticity thresholds — without disclosing their follower count, engagement figures, or any other sensitive data. Brands receive only a cryptographic verification result recorded on-chain.
@@ -572,7 +588,8 @@ Evidence files are in the `evidence/` directory.
 | Screenshot | Description |
 |---|---|
 | `evidence/compile-success.png` | Compact compiler output with circuits listed |
-| `evidence/deployment.png` | Deployed contract address on Preview |
+| `evidence/deployment.png` | Deployed contract address on Preview (live indexer response) |
+| `evidence/deploy-script-success.png` | Deploy script output — contract deployed successfully with TX hash |
 | `evidence/tests-passing.png` | All 9 tests passing |
 | `evidence/wallet-connected.png` | Lace wallet connected |
 | `evidence/circuit-success.png` | Successful proof verification |

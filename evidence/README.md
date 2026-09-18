@@ -11,6 +11,7 @@ This directory holds evidence screenshots and raw logs for the submission checkl
 | `compile-success.png` | Real `compact compile contracts/creator_authenticity.compact` run (Compact 0.5.2, WSL) — exit code 0, all ZK artifacts listed | ✅ Captured |
 | `compile-output.txt` | Raw text log of the same compile run | ✅ Captured |
 | `deployment.png` | **Live** Midnight Preview indexer response — the deployed contract with its 9 on-chain transactions, including the deployment tx `9d3010d3…36499` | ✅ Captured |
+| `deploy-script-success.png` | Deploy script terminal output — `CONTRACT DEPLOYED SUCCESSFULLY!` with network, contract address `c006cf20…c2a79`, deployment tx hash, and `deployment.json` updated | ✅ Captured |
 | `chain-query-response.json` | Raw JSON of the same live indexer query | ✅ Captured |
 | `circuit-success.png` | App Brand portal reading **live on-chain state**: `AUTHENTIC ✓`, verification counter, on-chain thresholds — the direct result of successful `proveAuthenticity()` circuit calls | ✅ Captured |
 | `wallet-connected.png` | App navbar showing the green "Connected" badge with the connected wallet (1AM, Midnight Preview) | ✅ Captured — provided screenshot of the live connected state |
