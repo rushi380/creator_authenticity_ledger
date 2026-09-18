@@ -73,7 +73,7 @@ export function Home({ walletState, onConnect }: HomeProps) {
                 </Button>
               </Link>
             ) : (
-              <Button variant="primary" size="lg" onClick={onConnect}
+              <Button variant="primary" size="lg" onClick={() => onConnect()}
                 loading={walletState.status === 'connecting'}>
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}

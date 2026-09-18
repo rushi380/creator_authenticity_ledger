@@ -48,7 +48,9 @@ export function useWallet() {
       const env = getEnvironment();
       const available = getAvailableWallets();
 
-      let targetId = preferredWalletId;
+      // Guard against event objects (e.g. onClick={connect}) reaching this as
+      // the wallet id — only an explicit string selects a specific wallet.
+      let targetId = typeof preferredWalletId === 'string' ? preferredWalletId : undefined;
       if (!targetId) {
         if (available.some(w => w.id === '1am')) {
           targetId = '1am';

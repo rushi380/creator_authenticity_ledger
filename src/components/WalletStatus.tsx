@@ -80,7 +80,7 @@ export function WalletStatus({ walletState, onConnect, onDisconnect }: WalletSta
             variant="primary"
             size="sm"
             loading={walletState.status === 'connecting'}
-            onClick={onConnect}
+            onClick={() => onConnect()}
           >
             {walletState.status === 'connecting' ? 'Connecting…' : 'Connect Wallet'}
           </Button>
